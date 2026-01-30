@@ -163,8 +163,8 @@ def read_enquiries(skip: int = 0, limit: int = 100, db: Session = Depends(get_db
 # ================== ADMIN AUTH ==================
 
 @app.post("/api/login")
-def login(admin: schemas.AdminCreate, db: Session = Depends(get_db)):
-    # Simple hardcoded auth for now
+def login(admin: schemas.AdminCreate):
+    # Simple hardcoded auth for now - No DB required to prevent 500 errors if DB is down
     if admin.username == "amaan@linearacademy" and admin.password == "Amaan@786":
         return {"access_token": "fake-token", "token_type": "bearer"}
     raise HTTPException(status_code=400, detail="Incorrect username or password")
