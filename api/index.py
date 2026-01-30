@@ -59,6 +59,16 @@ def login(creds: LoginRequest):
         # In production, be careful not to expose sensitive info, but here we need to know why it fails
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
+@app.get("/api/debug-info")
+def debug_info():
+    import pkg_resources
+    return {
+        "status": "alive",
+        "python_version": sys.version,
+        "cwd": os.getcwd(),
+        "db_available": DB_AVAILABLE
+    }
+
 # Try to import database modules - if this fails, we still have login working
 DB_AVAILABLE = False
 Base = None
