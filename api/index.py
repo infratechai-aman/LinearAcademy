@@ -16,7 +16,10 @@ from .database import Base, engine, get_db, SessionLocal
 from . import models, schemas, crud
 
 # Create tables on startup
-Base.metadata.create_all(bind=engine)
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print(f"Error creating tables: {e}")
 
 # Seed default data
 def seed_data():
