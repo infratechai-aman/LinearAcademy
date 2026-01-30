@@ -12,6 +12,32 @@ import uuid
 import json
 import random
 import sys
+import os
+
+# Add the current directory to sys.path to ensure local imports work
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+try:
+    from database import engine, SessionLocal, Base, get_db
+    import models
+    import crud
+    import schemas
+    DB_AVAILABLE = True
+except ImportError:
+    try:
+        from .database import engine, SessionLocal, Base, get_db
+        from . import models
+        from . import crud
+        from . import schemas
+        DB_AVAILABLE = True
+    except ImportError:
+        DB_AVAILABLE = False
+        Base = None
+        engine = None
+        SessionLocal = None
+        models = None
+        schemas = None
+        print("Database modules not found. Running in safe mode.")
 
 # Create FastAPI app FIRST before any imports that might fail
 app = FastAPI(title="Linear Academy API", version="2.0")
@@ -68,46 +94,13 @@ def debug_info():
         "db_available": DB_AVAILABLE
     }
 
-# Try to import database modules - if this fails, we still have login working
-DB_AVAILABLE = False
-Base = None
-engine = None
-# Dummy dependency for when DB is down
-def get_db_placeholder():
-    raise HTTPException(status_code=503, detail="Database not available")
-
-get_db = get_db_placeholder
-SessionLocal = None
-models = None
-schemas = None
-crud = None
-
-try:
-    # Add current directory to path
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    
-    from database import Base as _Base, engine as _engine, get_db as _get_db, SessionLocal as _SessionLocal
-    import models as _models
-    import schemas as _schemas
-    import crud as _crud
-    
-    Base = _Base
-    engine = _engine
-    get_db = _get_db
-    SessionLocal = _SessionLocal
-    models = _models
-    schemas = _schemas
-    crud = _crud
-    
-    if engine is not None:
-        try:
-            Base.metadata.create_all(bind=engine)
-            DB_AVAILABLE = True
-        except Exception as e:
-            print(f"Error creating tables: {e}")
-except Exception as e:
-    print(f"WARNING: Database modules failed to load: {e}")
-    # We continue without DB functionality
+# Database is already imported above
+if DB_AVAILABLE:
+    try:
+        if engine:
+            models.Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        print(f"Failed to connect to database: {e}")
 
 # Only define database-dependent endpoints if DB is available
 if DB_AVAILABLE and schemas is not None:
