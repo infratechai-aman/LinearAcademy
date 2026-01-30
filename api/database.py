@@ -17,17 +17,25 @@ if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 # Create engine with appropriate settings
-if DATABASE_URL.startswith("sqlite"):
-    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-else:
-    # PostgreSQL settings
-    engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+engine = None
+SessionLocal = None
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+try:
+    if DATABASE_URL.startswith("sqlite"):
+        engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+    else:
+        # PostgreSQL settings
+        engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+except Exception as e:
+    print(f"Failed to connect to database: {e}")
 
 Base = declarative_base()
 
 def get_db():
+    if SessionLocal is None:
+        raise Exception("Database connection is not available")
     db = SessionLocal()
     try:
         yield db
