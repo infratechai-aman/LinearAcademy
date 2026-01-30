@@ -74,9 +74,10 @@ const DemoBookingsManager = () => {
     const loadBookings = async () => {
         try {
             const res = await endpoints.getDemoBookings();
-            setBookings(res.data);
+            setBookings(Array.isArray(res.data) ? res.data : []);
         } catch (error) {
-            console.error(error);
+            console.error("Failed to load demo bookings:", error);
+            setBookings([]);
         } finally {
             setLoading(false);
         }
@@ -157,9 +158,9 @@ const DemoBookingsManager = () => {
                                 <div className="flex-1">
                                     <div className="flex items-center gap-3 mb-2">
                                         <h4 className="text-lg font-bold text-white">{booking.student_name}</h4>
-                                        <span className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-1 ${getStatusColor(booking.status)}`}>
-                                            {getStatusIcon(booking.status)}
-                                            {booking.status.toUpperCase()}
+                                        <span className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-1 ${getStatusColor(booking.status || 'pending')}`}>
+                                            {getStatusIcon(booking.status || 'pending')}
+                                            {(booking.status || 'pending').toUpperCase()}
                                         </span>
                                     </div>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
@@ -222,7 +223,16 @@ const EnquiriesManager = () => {
     const [enquiries, setEnquiries] = useState([]);
 
     useEffect(() => {
-        endpoints.getEnquiries().then(res => setEnquiries(res.data));
+        const fetchEnquiries = async () => {
+            try {
+                const res = await endpoints.getEnquiries();
+                setEnquiries(Array.isArray(res.data) ? res.data : []);
+            } catch (error) {
+                console.error("Failed to load enquiries:", error);
+                setEnquiries([]);
+            }
+        };
+        fetchEnquiries();
     }, []);
 
     return (
@@ -268,8 +278,14 @@ const StudentsManager = () => {
         loadStudents();
     }, []);
 
-    const loadStudents = () => {
-        endpoints.getStudents().then(res => setStudents(res.data));
+    const loadStudents = async () => {
+        try {
+            const res = await endpoints.getStudents();
+            setStudents(Array.isArray(res.data) ? res.data : []);
+        } catch (error) {
+            console.error("Failed to load students:", error);
+            setStudents([]);
+        }
     };
 
     const handleImageUpload = async (e) => {
@@ -375,7 +391,15 @@ const SettingsManager = () => {
     });
 
     useEffect(() => {
-        endpoints.getConfig().then(res => setConfig(res.data));
+        const fetchConfig = async () => {
+            try {
+                const res = await endpoints.getConfig();
+                if (res.data) setConfig(res.data);
+            } catch (error) {
+                console.error("Failed to load config:", error);
+            }
+        };
+        fetchConfig();
     }, []);
 
     const handleChange = (e) => {
@@ -450,10 +474,20 @@ const TestSeriesManager = () => {
     useEffect(() => { if (selectedSubject) loadSeries(); }, [selectedSubject]);
     useEffect(() => { if (selectedSeries) loadPdfs(); }, [selectedSeries]);
 
-    const loadClasses = async () => { const res = await endpoints.getClasses(); setClasses(res.data); };
-    const loadSubjects = async () => { const res = await endpoints.getSubjectsByClass(selectedClass.id); setSubjects(res.data); };
-    const loadSeries = async () => { const res = await endpoints.getTestSeriesBySubject(selectedSubject.id); setSeries(res.data); };
-    const loadPdfs = async () => { const res = await endpoints.getPDFsByTestSeries(selectedSeries.id); setPdfs(res.data); };
+    const safelyLoad = async (apiCall, setter) => {
+        try {
+            const res = await apiCall;
+            setter(res.data ? (Array.isArray(res.data) ? res.data : []) : []);
+        } catch (error) {
+            console.error(error);
+            setter([]);
+        }
+    };
+
+    const loadClasses = () => safelyLoad(endpoints.getClasses(), setClasses);
+    const loadSubjects = () => { if (selectedClass) safelyLoad(endpoints.getSubjectsByClass(selectedClass.id), setSubjects); };
+    const loadSeries = () => { if (selectedSubject) safelyLoad(endpoints.getTestSeriesBySubject(selectedSubject.id), setSeries); };
+    const loadPdfs = () => { if (selectedSeries) safelyLoad(endpoints.getPDFsByTestSeries(selectedSeries.id), setPdfs); };
 
     const handleCreateSeries = async (e) => {
         e.preventDefault();
@@ -803,13 +837,28 @@ const MCQTestsManager = () => {
     useEffect(() => { if (selectedSeries) loadTests(); }, [selectedSeries]);
     useEffect(() => { if (selectedTest) loadQuestions(); }, [selectedTest]);
 
-    const loadClasses = async () => { const res = await endpoints.getClasses(); setClasses(res.data); };
-    const loadSubjects = async () => { const res = await endpoints.getSubjectsByClass(selectedClass.id); setSubjects(res.data); };
-    const loadSeries = async () => { const res = await endpoints.getTestSeriesBySubject(selectedSubject.id); setSeries(res.data); };
-    const loadTests = async () => { const res = await endpoints.getTestsByTestSeries(selectedSeries.id); setTests(res.data); };
+    const safelyLoad = async (apiCall, setter) => {
+        try {
+            const res = await apiCall;
+            setter(res.data ? (Array.isArray(res.data) ? res.data : []) : []);
+        } catch (error) {
+            console.error(error);
+            setter([]);
+        }
+    };
+
+    const loadClasses = () => safelyLoad(endpoints.getClasses(), setClasses);
+    const loadSubjects = () => { if (selectedClass) safelyLoad(endpoints.getSubjectsByClass(selectedClass.id), setSubjects); };
+    const loadSeries = () => { if (selectedSubject) safelyLoad(endpoints.getTestSeriesBySubject(selectedSubject.id), setSeries); };
+    const loadTests = () => { if (selectedSeries) safelyLoad(endpoints.getTestsByTestSeries(selectedSeries.id), setTests); };
     const loadQuestions = async () => {
-        const res = await endpoints.getTestForAdmin(selectedTest.id);
-        setQuestions(res.data.questions || []);
+        try {
+            const res = await endpoints.getTestForAdmin(selectedTest.id);
+            setQuestions((res.data && Array.isArray(res.data.questions)) ? res.data.questions : []);
+        } catch (error) {
+            console.error("Failed to load questions:", error);
+            setQuestions([]);
+        }
     };
 
     const handleCreateTest = async (e) => {
@@ -1194,7 +1243,15 @@ const CoursesManager = () => {
     const [formData, setFormData] = useState({ title: '', description: '', is_free: true, price: 0, video_url: '', instructor_name: '' });
 
     useEffect(() => { loadCourses(); }, []);
-    const loadCourses = async () => { const res = await endpoints.getCourses(); setCourses(res.data); };
+    const loadCourses = async () => {
+        try {
+            const res = await endpoints.getCourses();
+            setCourses(Array.isArray(res.data) ? res.data : []);
+        } catch (error) {
+            console.error("Failed to load courses:", error);
+            setCourses([]);
+        }
+    };
 
     const handleCreate = async (e) => {
         e.preventDefault();
