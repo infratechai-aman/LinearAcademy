@@ -66,8 +66,27 @@ class LoginRequest(BaseModel):
 
 # ================== ADMIN AUTH (No DB required) ==================
 @app.post("/api/login")
-        # In production, be careful not to expose sensitive info, but here we need to know why it fails
-        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+def login(request: LoginRequest, db: Session = Depends(get_db)):
+    # Hardcoded admin check (ALWAYS allowed, helps in recovery)
+    if request.username == "amaan@linearacademy" and request.password == "Amaan@786":
+         return {"access_token": "admin-super-secret-token", "token_type": "bearer", "user": {"username": "admin", "role": "admin"}}
+    
+    # If DB is down and it's not the hardcoded admin, we can't do anything
+    if db is None:
+        raise HTTPException(status_code=503, detail="Database Unavailable. Please use emergency admin credentials.")
+
+    try:
+        user = crud.get_user_by_email(db, email=request.username)
+        if not user:
+            raise HTTPException(status_code=400, detail="Incorrect username or password")
+        if not user.verify_password(request.password):
+            raise HTTPException(status_code=400, detail="Incorrect username or password")
+        
+        return {"access_token": "user-token", "token_type": "bearer", "user": {"username": user.email, "role": "user"}}
+    except Exception as e:
+        print(f"Login error: {e}")
+        # If expected DB error, re-raise 500
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/debug-info")
 def debug_info():
