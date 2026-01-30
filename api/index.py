@@ -12,8 +12,9 @@ import json
 import random
 
 # Import local modules
-from .database import Base, engine, get_db, SessionLocal
-from . import models, schemas, crud
+# Import local modules
+from api.database import Base, engine, get_db, SessionLocal
+from api import models, schemas, crud
 
 # Create tables on startup
 try:
