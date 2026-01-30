@@ -437,5 +437,4 @@ if DB_AVAILABLE and schemas is not None:
             "message": "Use cloud storage in production"
         }
 
-# Vercel handler
-handler = app
+
