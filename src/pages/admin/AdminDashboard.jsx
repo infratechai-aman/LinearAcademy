@@ -149,7 +149,7 @@ const DemoBookingsManager = () => {
                 </div>
             ) : (
                 <div className="space-y-4">
-                    {bookings.map((booking) => (
+                    {Array.isArray(bookings) && bookings.map((booking) => (
                         <div
                             key={booking.id}
                             className="bg-white/5 rounded-xl border border-white/10 p-6 hover:border-luxury-gold/30 transition-colors"
@@ -250,7 +250,7 @@ const EnquiriesManager = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-white/10">
-                        {enquiries.map((enq) => (
+                        {Array.isArray(enquiries) && enquiries.map((enq) => (
                             <tr key={enq.id} className="hover:bg-white/5">
                                 <td className="p-4">{enq.first_name} {enq.last_name}</td>
                                 <td className="p-4">
@@ -364,7 +364,7 @@ const StudentsManager = () => {
 
             {/* List */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {students.map(student => (
+                {Array.isArray(students) && students.map(student => (
                     <div key={student.id} className="bg-white/5 border border-white/10 rounded-xl p-4 relative group">
                         <button
                             onClick={() => handleDelete(student.id)}
@@ -592,7 +592,7 @@ const TestSeriesManager = () => {
                 <div>
                     <h2 className="text-xl font-bold mb-4 text-white">Select a Class</h2>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {classes.map((cls) => (
+                        {Array.isArray(classes) && classes.map((cls) => (
                             <div
                                 key={cls.id}
                                 onClick={() => setSelectedClass(cls)}
@@ -620,7 +620,7 @@ const TestSeriesManager = () => {
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {subjects.map((subject) => (
+                            {Array.isArray(subjects) && subjects.map((subject) => (
                                 <div
                                     key={subject.id}
                                     onClick={() => setSelectedSubject(subject)}
@@ -699,7 +699,7 @@ const TestSeriesManager = () => {
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {series.map((s) => (
+                            {Array.isArray(series) && series.map((s) => (
                                 <div
                                     key={s.id}
                                     className="bg-white/5 p-5 rounded-xl border border-white/10 hover:border-luxury-gold/50 transition-all relative group"
@@ -786,7 +786,7 @@ const TestSeriesManager = () => {
                         </div>
                     ) : (
                         <div className="space-y-3">
-                            {pdfs.map((pdf) => (
+                            {Array.isArray(pdfs) && pdfs.map((pdf) => (
                                 <div key={pdf.id} className="flex items-center justify-between bg-white/5 p-4 rounded-lg border border-white/10 hover:border-red-500/30 group">
                                     <div className="flex items-center gap-4">
                                         <div className="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center">
@@ -955,7 +955,7 @@ const MCQTestsManager = () => {
                 <div>
                     <h2 className="text-xl font-bold mb-4 text-white">Select a Class</h2>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {classes.map((cls) => (
+                        {Array.isArray(classes) && classes.map((cls) => (
                             <div
                                 key={cls.id}
                                 onClick={() => setSelectedClass(cls)}
@@ -977,7 +977,7 @@ const MCQTestsManager = () => {
                 <div>
                     <h2 className="text-xl font-bold mb-4 text-white">Select a Subject in {selectedClass.display_name}</h2>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {subjects.map((subject) => (
+                        {Array.isArray(subjects) && subjects.map((subject) => (
                             <div
                                 key={subject.id}
                                 onClick={() => setSelectedSubject(subject)}
@@ -1001,7 +1001,7 @@ const MCQTestsManager = () => {
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            {series.map((s) => (
+                            {Array.isArray(series) && series.map((s) => (
                                 <div
                                     key={s.id}
                                     onClick={() => setSelectedSeries(s)}
@@ -1057,7 +1057,7 @@ const MCQTestsManager = () => {
                         </div>
                     ) : (
                         <div className="space-y-3">
-                            {tests.map((test) => (
+                            {Array.isArray(tests) && tests.map((test) => (
                                 <div key={test.id} className="flex items-center justify-between bg-white/5 p-4 rounded-lg border border-white/10 hover:border-luxury-gold/50 group">
                                     <div className="flex items-center gap-4" onClick={() => setSelectedTest(test)} style={{ cursor: 'pointer', flex: 1 }}>
                                         <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
@@ -1205,7 +1205,7 @@ const MCQTestsManager = () => {
                         </div>
                     ) : (
                         <div className="space-y-3">
-                            {questions.map((q, idx) => (
+                            {Array.isArray(questions) && questions.map((q, idx) => (
                                 <div key={q.id} className="bg-white/5 p-4 rounded-lg border border-white/10 group">
                                     <div className="flex items-start justify-between">
                                         <div className="flex-1">
@@ -1286,7 +1286,7 @@ const CoursesManager = () => {
                 </form>
             )}
             <div className="grid grid-cols-3 gap-4">
-                {courses.map(course => (
+                {Array.isArray(courses) && courses.map(course => (
                     <div key={course.id} className="bg-white/5 p-4 rounded-xl border border-white/10 relative">
                         <button onClick={() => handleDelete(course.id)} className="absolute top-2 right-2 text-red-400"><Trash2 size={16} /></button>
                         <h3 className="font-bold text-lg pr-6">{course.title}</h3>
