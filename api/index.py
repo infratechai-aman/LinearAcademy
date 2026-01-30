@@ -6,6 +6,7 @@ ULTRA-DEFENSIVE: Wraps all imports to prevent crashes on Vercel.
 from fastapi import FastAPI, Depends, HTTPException, File, UploadFile, Query
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
+from pydantic import BaseModel
 import os
 import uuid
 import json
@@ -33,15 +34,19 @@ def read_root():
 def health_check():
     return {"status": "healthy", "database": DB_AVAILABLE, "framework": "fastapi"}
 
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
 # ================== ADMIN AUTH (No DB required) ==================
 @app.post("/api/login")
-def login(username: str = None, password: str = None):
+def login(creds: LoginRequest):
     """
     Login endpoint - works even if database is down.
-    Accepts both JSON body and form data.
+    Accepts JSON body via Pydantic model.
     """
     # Simple hardcoded auth to ensure admin access in emergency
-    if username == "amaan@linearacademy" and password == "Amaan@786":
+    if creds.username == "amaan@linearacademy" and creds.password == "Amaan@786":
          # In a real scenario ideally we check DB, but this bypass allows fixing config 
          # even if DB connection is broken
         return {"access_token": "fake-token", "token_type": "bearer"}
