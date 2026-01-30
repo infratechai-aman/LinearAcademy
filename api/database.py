@@ -25,9 +25,18 @@ try:
         engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
     else:
         # PostgreSQL settings
-        engine = create_engine(DATABASE_URL, pool_pre_ping=True)
-
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        try:
+            engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+            # Test connection immediately to catch bad URLs early, but don't crash the app
+            # Note: create_engine is lazy, so we might not see the error until we connect
+        except Exception as e:
+            print(f"Failed to create engine: {e}")
+            engine = None
+    
+    if engine:
+        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    else:
+        SessionLocal = None
 except Exception as e:
     print(f"Failed to connect to database: {e}")
 

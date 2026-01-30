@@ -17,7 +17,7 @@ class SiteConfigCreate(SiteConfigBase):
 class SiteConfig(SiteConfigBase):
     id: int
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # --- Student ---
 class StudentBase(BaseModel):
@@ -33,7 +33,7 @@ class StudentCreate(StudentBase):
 class Student(StudentBase):
     id: int
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # --- Enquiry ---
 class EnquiryBase(BaseModel):
@@ -51,7 +51,7 @@ class Enquiry(EnquiryBase):
     id: int
     created_at: Optional[str] = None
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # --- Admin ---
 class AdminBase(BaseModel):
@@ -84,7 +84,7 @@ class DemoBooking(DemoBookingBase):
     status: str = "pending"
     created_at: Optional[str] = None
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # ================== TEST SERIES SCHEMAS ==================
@@ -103,7 +103,7 @@ class AcademicClassCreate(AcademicClassBase):
 class AcademicClass(AcademicClassBase):
     id: int
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # --- Subject ---
@@ -121,7 +121,7 @@ class SubjectCreate(SubjectBase):
 class Subject(SubjectBase):
     id: int
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # --- Test Series ---
@@ -143,7 +143,7 @@ class TestSeries(TestSeriesBase):
     id: int
     created_at: Optional[str] = None
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # --- PDF Resource ---
@@ -163,7 +163,7 @@ class PDFResource(PDFResourceBase):
     is_active: bool = True
     created_at: Optional[str] = None
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # --- MCQ Test ---
@@ -185,7 +185,7 @@ class MCQTest(MCQTestBase):
     id: int
     created_at: Optional[str] = None
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # --- MCQ Question ---
@@ -208,7 +208,7 @@ class MCQQuestionCreate(MCQQuestionBase):
 class MCQQuestion(MCQQuestionBase):
     id: int
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # --- Test Attempt ---
@@ -232,7 +232,7 @@ class TestAttempt(TestAttemptBase):
     answers_json: Optional[str] = None
     completed_at: Optional[str] = None
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # ================== COURSES SCHEMAS ==================
@@ -259,7 +259,7 @@ class Course(CourseBase):
     id: int
     created_at: Optional[str] = None
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # --- Full Test with Questions (for API response) ---
