@@ -66,22 +66,6 @@ class LoginRequest(BaseModel):
 
 # ================== ADMIN AUTH (No DB required) ==================
 @app.post("/api/login")
-def login(creds: LoginRequest):
-    """
-    Login endpoint - works even if database is down.
-    Accepts JSON body via Pydantic model.
-    """
-    try:
-        # Simple hardcoded auth to ensure admin access in emergency
-        if creds.username == "amaan@linearacademy" and creds.password == "Amaan@786":
-             # In a real scenario ideally we check DB, but this bypass allows fixing config 
-             # even if DB connection is broken
-            return {"access_token": "fake-token", "token_type": "bearer"}
-        
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
-    except Exception as e:
-        # Return the actual error message for debugging
-        print(f"LOGIN ERROR: {str(e)}")
         # In production, be careful not to expose sensitive info, but here we need to know why it fails
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 

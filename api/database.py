@@ -44,7 +44,8 @@ Base = declarative_base()
 
 def get_db():
     if SessionLocal is None:
-        raise Exception("Database connection is not available")
+        yield None
+        return
     db = SessionLocal()
     try:
         yield db
