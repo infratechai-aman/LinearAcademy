@@ -6,15 +6,18 @@ from fastapi import FastAPI, Depends, HTTPException, File, UploadFile, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import Optional
+import sys
 import os
 import uuid
 import json
 import random
 
-# Import local modules
-# Import local modules
-from api.database import Base, engine, get_db, SessionLocal
-from api import models, schemas, crud
+# Add current directory to path so we can import local modules directly
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+# Import local modules using direct names (since we added to path)
+from database import Base, engine, get_db, SessionLocal
+import models, schemas, crud
 
 # Create tables on startup
 try:
