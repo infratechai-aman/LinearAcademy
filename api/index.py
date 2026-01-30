@@ -1,18 +1,18 @@
-from fastapi import FastAPI
+from http.server import BaseHTTPRequestHandler
+import json
 
-app = FastAPI()
+class handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        response = {"message": "Raw Python Handler is ALIVE", "path": self.path}
+        self.wfile.write(json.dumps(response).encode('utf-8'))
+    
+    def do_POST(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        response = {"message": "POST successful via Raw Handler"}
+        self.wfile.write(json.dumps(response).encode('utf-8'))
 
-@app.get("/")
-def read_root():
-    return {"message": "Hello World - Backend is ALIVE"}
-
-@app.get("/api/health")
-def health():
-    return {"status": "healthy"}
-
-@app.post("/api/login")
-def login():
-    return {"access_token": "fake-token", "token_type": "bearer"}
-
-# Vercel handler
-handler = app
