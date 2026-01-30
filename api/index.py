@@ -14,6 +14,12 @@ import random
 import sys
 import os
 
+try:
+    from sqlalchemy.orm import Session
+except ImportError:
+    # Fallback for type hinting if sqlalchemy is missing
+    class Session: pass
+
 # Add the current directory to sys.path to ensure local imports work
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
