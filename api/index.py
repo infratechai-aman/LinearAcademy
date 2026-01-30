@@ -73,7 +73,11 @@ def debug_info():
 DB_AVAILABLE = False
 Base = None
 engine = None
-get_db = None
+# Dummy dependency for when DB is down
+def get_db_placeholder():
+    raise HTTPException(status_code=503, detail="Database not available")
+
+get_db = get_db_placeholder
 SessionLocal = None
 models = None
 schemas = None
