@@ -114,7 +114,7 @@ const Courses = () => {
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {freeCourses.map((course, index) => (
+                                    {Array.isArray(freeCourses) && freeCourses.map((course, index) => (
                                         <CourseCard key={course.id} course={course} index={index} />
                                     ))}
                                 </div>
@@ -143,7 +143,7 @@ const Courses = () => {
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {paidCourses.map((course, index) => (
+                                    {Array.isArray(paidCourses) && paidCourses.map((course, index) => (
                                         <CourseCard key={course.id} course={course} index={index} isPaid />
                                     ))}
                                 </div>

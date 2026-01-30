@@ -170,7 +170,7 @@ const TestSeries = () => {
                         >
                             <h2 className="text-2xl font-serif mb-8">Select Your Class</h2>
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                                {classes.map((cls, index) => (
+                                {Array.isArray(classes) && classes.map((cls, index) => (
                                     <motion.div
                                         key={cls.id}
                                         initial={{ opacity: 0, y: 20 }}
@@ -212,7 +212,7 @@ const TestSeries = () => {
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                                    {subjects.map((subject, index) => (
+                                    {Array.isArray(subjects) && subjects.map((subject, index) => (
                                         <motion.div
                                             key={subject.id}
                                             initial={{ opacity: 0, scale: 0.9 }}
@@ -256,7 +256,7 @@ const TestSeries = () => {
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {testSeries.map((series, index) => (
+                                    {Array.isArray(testSeries) && testSeries.map((series, index) => (
                                         <motion.div
                                             key={series.id}
                                             initial={{ opacity: 0, y: 20 }}
@@ -339,7 +339,7 @@ const TestSeries = () => {
                                         </div>
                                     ) : (
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            {pdfs.map((pdf) => (
+                                            {Array.isArray(pdfs) && pdfs.map((pdf) => (
                                                 <a
                                                     key={pdf.id}
                                                     href={pdf.file_url}
@@ -375,7 +375,7 @@ const TestSeries = () => {
                                         </div>
                                     ) : (
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            {tests.map((test) => (
+                                            {Array.isArray(tests) && tests.map((test) => (
                                                 <div
                                                     key={test.id}
                                                     className="bg-gradient-to-br from-white/5 to-white/0 p-6 rounded-xl border border-white/10 hover:border-luxury-gold transition-all"
