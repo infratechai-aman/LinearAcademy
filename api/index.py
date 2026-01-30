@@ -61,7 +61,6 @@ def login(creds: LoginRequest):
 
 @app.get("/api/debug-info")
 def debug_info():
-    import pkg_resources
     return {
         "status": "alive",
         "python_version": sys.version,
