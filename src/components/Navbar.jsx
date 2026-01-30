@@ -3,6 +3,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import logoV2 from '../assets/logo-v2.png';
+
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
@@ -25,7 +27,6 @@ const Navbar = () => {
         { name: 'Home', path: '/' },
         { name: 'About', path: '/about' },
         { name: 'Courses', path: '/courses' },
-        { name: 'Test Series', path: '/test-series' },
         { name: 'Contact', path: '/contact' },
     ];
 
@@ -42,7 +43,7 @@ const Navbar = () => {
                         <div className="absolute inset-0 bg-luxury-gold/20 blur-xl rounded-full opacity-0 group-hover:opacity-40 transition-opacity duration-500" />
                         {/* 3D Logo Icon */}
                         <img
-                            src="/src/assets/logo-v2.png"
+                            src={logoV2}
                             alt="Linear Academy Logo"
                             className="h-16 w-auto object-contain relative z-10 mix-blend-screen transition-transform duration-500 group-hover:rotate-y-12 group-hover:scale-110 drop-shadow-[0_0_15px_rgba(212,175,55,0.3)]"
                         />
