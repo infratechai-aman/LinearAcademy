@@ -5,7 +5,7 @@ import { endpoints } from '../services/api';
 
 const Courses = () => {
     const [showBookingModal, setShowBookingModal] = useState(false);
-    const [activeTab, setActiveTab] = useState('free');
+    const [activeTab, setActiveTab] = useState('academic');
     const [freeCourses, setFreeCourses] = useState([]);
     const [paidCourses, setPaidCourses] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -76,7 +76,7 @@ const Courses = () => {
             {/* Course Tabs */}
             <section className="container mx-auto px-6 py-12">
                 <div className="flex justify-center gap-4 mb-12">
-                    {['free', 'paid', 'academic'].map((tab) => (
+                    {['academic', 'free', 'paid'].map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}

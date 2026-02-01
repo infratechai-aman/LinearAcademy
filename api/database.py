@@ -3,14 +3,20 @@ Database connection module for Linear Academy API.
 Supports PostgreSQL for production (Vercel + Hostinger) and SQLite for local development.
 """
 import os
-from sqlalchemy import create_engine
+import sys
+from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from fastapi import HTTPException, status
 
 # Get database URL from environment variable
-# For Hostinger PostgreSQL: postgresql://user:password@host:5432/linear_academy
-# For local development: sqlite:///./linear_academy.db
-DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./linear_academy.db")
+# Defaults to SQLite only if DATABASE_URL is explicitly missing
+# In production (Vercel), DATABASE_URL should be set to the PostgreSQL URL
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+if not DATABASE_URL:
+    print("WARNING: DATABASE_URL not found. Defaulting to local SQLite.")
+    DATABASE_URL = "sqlite:///./linear_academy.db"
 
 # Handle special case for some PostgreSQL URLs (Vercel/Heroku format)
 if DATABASE_URL.startswith("postgres://"):
@@ -26,11 +32,10 @@ try:
     else:
         # PostgreSQL settings
         try:
-            engine = create_engine(DATABASE_URL, pool_pre_ping=True)
-            # Test connection immediately to catch bad URLs early, but don't crash the app
-            # Note: create_engine is lazy, so we might not see the error until we connect
+            # pool_pre_ping=True helps verify connections before using them
+            engine = create_engine(DATABASE_URL, pool_pre_ping=True, pool_size=10, max_overflow=20)
         except Exception as e:
-            print(f"Failed to create engine: {e}")
+            print(f"Failed to create PostgreSQL engine: {e}")
             engine = None
     
     if engine:
@@ -38,16 +43,28 @@ try:
     else:
         SessionLocal = None
 except Exception as e:
-    print(f"Failed to connect to database: {e}")
+    print(f"Critical Database Error: {e}")
 
 Base = declarative_base()
 
 def get_db():
     if SessionLocal is None:
-        yield None
-        return
+        print("ERROR: Database session could not be created (SessionLocal is None).")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database connection is currently unavailable. Please try again later."
+        )
+    
     db = SessionLocal()
     try:
+        # Optional: verify connection is actually alive
+        # db.execute(text("SELECT 1"))
         yield db
+    except Exception as e:
+        print(f"Database session error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, 
+            detail="Database operation failed"
+        )
     finally:
         db.close()
