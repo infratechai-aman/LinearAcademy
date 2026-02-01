@@ -424,8 +424,15 @@ if DB_AVAILABLE and schemas is not None:
 
     # ================== FILE UPLOAD ==================
     @app.post("/api/upload")
+    @app.post("/api/upload")
     async def upload_image(file: UploadFile = File(...)):
-        return {"url": f"https://placeholder.com/{uuid.uuid4()}.jpg", "message": "Use cloud storage in production"}
+        import base64
+        contents = await file.read()
+        encoded_string = base64.b64encode(contents).decode('utf-8')
+        # Determine mime type roughly
+        content_type = file.content_type if file.content_type else "image/jpeg"
+        data_uri = f"data:{content_type};base64,{encoded_string}"
+        return {"url": data_uri, "message": "Image converted to Base64 (Serverless compatible)"}
 
     @app.post("/api/upload-pdf")
     async def upload_pdf(file: UploadFile = File(...)):

@@ -26,7 +26,7 @@ class Student(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
     rank = Column(String) # e.g., "98.5% - Class 10"
-    image_url = Column(String)
+    image_url = Column(Text)
     description = Column(Text)
     is_active = Column(Boolean, default=True)
 
@@ -97,7 +97,7 @@ class TestSeries(Base):
     is_free = Column(Boolean, default=True)
     price = Column(Integer, default=0)  # Price in INR
     discount_price = Column(Integer, nullable=True)
-    thumbnail_url = Column(String, nullable=True)
+    thumbnail_url = Column(Text, nullable=True)
     order_index = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)
     created_at = Column(String)
@@ -143,7 +143,7 @@ class MCQQuestion(Base):
     id = Column(Integer, primary_key=True, index=True)
     test_id = Column(Integer, index=True)  # ForeignKey to MCQTest
     question_text = Column(Text)
-    question_image_url = Column(String, nullable=True)
+    question_image_url = Column(Text, nullable=True)
     option_a = Column(String)
     option_b = Column(String)
     option_c = Column(String)
@@ -182,7 +182,7 @@ class Course(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String)
     description = Column(Text)
-    thumbnail_url = Column(String, nullable=True)
+    thumbnail_url = Column(Text, nullable=True)
     class_id = Column(Integer, nullable=True)  # Optional class association
     is_free = Column(Boolean, default=True)
     price = Column(Integer, default=0)
