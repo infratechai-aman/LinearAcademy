@@ -899,7 +899,7 @@ const MCQTestsManager = () => {
             loadQuestions();
             // Update test's total_questions count
             const updatedTest = await endpoints.getTestForAdmin(selectedTest.id);
-            setSelectedTest({ ...selectedTest, total_questions: updatedTest.data.total_questions_in_bank });
+            setSelectedTest({ ...selectedTest, total_questions: updatedTest.data.total_questions });
         } catch (error) {
             console.error('Failed to create question:', error);
             alert('Failed to create question: ' + (error.response?.data?.detail || error.message));
