@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { endpoints } from '../../services/api';
 import { Trash2, Plus, LogOut, Loader, Calendar, CheckCircle, XCircle, Clock, BookOpen, FileText, ClipboardList, PlayCircle, Settings, Users, MessageSquare, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import logo from '../../assets/logo-v2.png';
 
 const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('demo-bookings');
@@ -27,7 +28,7 @@ const AdminDashboard = () => {
             {/* Sidebar */}
             <aside className="w-64 bg-luxury-charcoal border-r border-white/10 p-6 flex flex-col fixed h-full">
                 <div className="flex items-center gap-3 mb-8">
-                    <img src="/src/assets/logo-v2.png" alt="Linear Academy" className="w-10 h-10 object-contain" />
+                    <img src={logo} alt="Linear Academy" className="w-10 h-10 object-contain" />
                     <h2 className="text-xl font-serif text-luxury-gold">Admin Panel</h2>
                 </div>
                 <nav className="flex-1 space-y-2 overflow-y-auto">
