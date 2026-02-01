@@ -26,6 +26,7 @@ export const endpoints = {
     // Config
     getConfig: () => api.get('/config'),
     updateConfig: (data) => api.post('/config', data),
+    seedData: () => api.post('/seed'),
 
     // Students (Top Performers)
     getStudents: () => api.get('/students'),

@@ -592,6 +592,31 @@ const TestSeriesManager = () => {
             {!selectedClass && (
                 <div>
                     <h2 className="text-xl font-bold mb-4 text-white">Select a Class</h2>
+
+                    {/* Empty State / Seed Button */}
+                    {classes.length === 0 && (
+                        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-8 text-center mb-8">
+                            <h3 className="text-xl font-bold text-red-500 mb-2">No Classes Found</h3>
+                            <p className="text-gray-400 mb-6">The database appears to be empty. Click below to initialize default classes.</p>
+                            <button
+                                onClick={async () => {
+                                    if (confirm('Initialize database with default classes?')) {
+                                        try {
+                                            await endpoints.seedData();
+                                            alert('Data initialized! Refreshing...');
+                                            loadClasses();
+                                        } catch (e) {
+                                            alert('Failed: ' + e.message);
+                                        }
+                                    }
+                                }}
+                                className="bg-red-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-red-600 transition-colors"
+                            >
+                                Initialize System Data
+                            </button>
+                        </div>
+                    )}
+
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {Array.isArray(classes) && classes.map((cls) => (
                             <div
