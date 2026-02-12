@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import logoV2 from '../assets/logo-v2.png';
+import logoNew from '../assets/logo-new.jpg';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -40,23 +40,11 @@ const Navbar = () => {
         >
             <div className="container mx-auto px-6 flex justify-between items-center">
                 <Link to="/" className="flex items-center gap-3 group">
-                    <div className="relative perspective-1000">
-                        <div className="absolute inset-0 bg-luxury-gold/20 blur-xl rounded-full opacity-0 group-hover:opacity-40 transition-opacity duration-500" />
-                        {/* 3D Logo Icon */}
-                        <img
-                            src={logoV2}
-                            alt="Linear Academy Logo"
-                            className="h-16 w-auto object-contain relative z-10 mix-blend-screen transition-transform duration-500 group-hover:rotate-y-12 group-hover:scale-110 drop-shadow-[0_0_15px_rgba(212,175,55,0.3)]"
-                        />
-                    </div>
-                    <div className="flex flex-col">
-                        <span className="text-2xl font-serif font-bold text-white tracking-wider leading-none group-hover:text-luxury-gold transition-colors duration-300">
-                            LINEAR
-                        </span>
-                        <span className="text-sm font-sans tracking-[0.3em] text-luxury-gold leading-none">
-                            ACADEMY
-                        </span>
-                    </div>
+                    <img
+                        src={logoNew}
+                        alt="Linear Academy Logo"
+                        className="h-12 md:h-16 w-auto object-contain transition-transform duration-500 group-hover:scale-105"
+                    />
                 </Link>
 
                 {/* Desktop Menu */}

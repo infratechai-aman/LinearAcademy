@@ -1,0 +1,26 @@
+--- Verifying Test Series & MCQ Managers ---
+
+1. Creating Academic Class...
+   Created Class: 11 - Class Test c7cb
+
+2. Creating Subject...
+   Created Subject: 32 - Test Physics
+
+3. Creating Test Series...
+   Created Series: 5 - Physics Master Series
+
+4. Creating MCQ Test...
+   Created Test: 1 - Kinematics Unit Test
+
+5. Adding Questions...
+   Created Q1: 1
+   Created Q2: 2
+
+6. Verifying Test Counts (Questions & Marks)...
+   Test Total Questions: 2 (Expected: 2)
+   Test Total Marks: 8 (Expected: 8)
+   [SUCCESS] Counts verified!
+
+7. Cleaning up test data...
+
+--- Verification Complete ---

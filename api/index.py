@@ -336,6 +336,89 @@ if DB_AVAILABLE and schemas is not None:
             raise HTTPException(status_code=404, detail="Question not found")
         return {"message": "Question deleted"}
 
+    @app.post("/api/seed")
+    def seed_database(db: Session = Depends(get_db)):
+        messages = []
+        try:
+            # 0. RUN MIGRATION (Fix Image Uploads)
+            try:
+                from sqlalchemy import text
+                # We use the existing engine from database module
+                if engine.dialect.name != 'sqlite':
+                    with engine.connect() as conn:
+                        trans = conn.begin()
+                        try:
+                            conn.execute(text("ALTER TABLE students ALTER COLUMN image_url TYPE TEXT;"))
+                            conn.execute(text("ALTER TABLE test_series ALTER COLUMN thumbnail_url TYPE TEXT;"))
+                            conn.execute(text("ALTER TABLE mcq_questions ALTER COLUMN question_image_url TYPE TEXT;"))
+                            conn.execute(text("ALTER TABLE courses ALTER COLUMN thumbnail_url TYPE TEXT;"))
+                            trans.commit()
+                            messages.append("Database Schema Migrated (Image Uploads Fixed).")
+                        except Exception as e:
+                            trans.rollback()
+                            # Ignore error if columns are already TEXT
+                            messages.append(f"Migration Note: {str(e)}")
+            except Exception as e:
+                messages.append(f"Migration Skipped: {str(e)}")
+
+            # 1. Seed Academic Classes
+            classes = [
+                {"name": "Class 8", "display_name": "Class 8th", "order": 1},
+                {"name": "Class 9", "display_name": "Class 9th", "order": 2},
+                {"name": "Class 10", "display_name": "Class 10th", "order": 3},
+                {"name": "Class 11 Science", "display_name": "Class 11th (Science)", "stream": "science", "order": 4},
+                {"name": "Class 11 Commerce", "display_name": "Class 11th (Commerce)", "stream": "commerce", "order": 5},
+                {"name": "Class 11 Arts", "display_name": "Class 11th (Arts)", "stream": "arts", "order": 6},
+                {"name": "Class 12 Science", "display_name": "Class 12th (Science)", "stream": "science", "order": 7},
+                {"name": "Class 12 Commerce", "display_name": "Class 12th (Commerce)", "stream": "commerce", "order": 8},
+                {"name": "Class 12 Arts", "display_name": "Class 12th (Arts)", "stream": "arts", "order": 9},
+            ]
+
+            for cls_info in classes:
+                exists = db.query(models.AcademicClass).filter(models.AcademicClass.name == cls_info["name"]).first()
+                if not exists:
+                    db_cls = models.AcademicClass(
+                        name=cls_info["name"],
+                        display_name=cls_info["display_name"],
+                        stream=cls_info.get("stream"),
+                        order_index=cls_info["order"]
+                    )
+                    db.add(db_cls)
+            db.commit()
+            messages.append("Classes Seeded.")
+
+            # 2. Seed Basic Subjects (Example for Class 10)
+            class_10 = db.query(models.AcademicClass).filter(models.AcademicClass.name == "Class 10").first()
+            if class_10:
+                subjects = [
+                    {"name": "Mathematics", "icon": "📐", "color": "#4CAF50"},
+                    {"name": "Science", "icon": "🔬", "color": "#2196F3"},
+                    {"name": "Social Science", "icon": "🌍", "color": "#FF9800"},
+                    {"name": "English", "icon": "📖", "color": "#9C27B0"},
+                ]
+                
+                for sub in subjects:
+                    exists = db.query(models.Subject).filter(
+                        models.Subject.class_id == class_10.id,
+                        models.Subject.name == sub["name"]
+                    ).first()
+                    if not exists:
+                        db_sub = models.Subject(
+                            class_id=class_10.id,
+                            name=sub["name"],
+                            icon=sub["icon"],
+                            color=sub["color"]
+                        )
+                        db.add(db_sub)
+            
+            db.commit()
+            messages.append("Subjects Seeded.")
+            
+            return {"message": "Success", "details": messages}
+        except Exception as e:
+            print(f"Seeding error: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+
     # ================== TEST ATTEMPTS & SCORING ==================
     @app.post("/api/tests/{test_id}/submit")
     def submit_test(test_id: int, attempt: schemas.TestAttemptCreate, time_taken: int = 0, db: Session = Depends(get_db)):
