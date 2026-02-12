@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import logoNew from '../assets/logo-new.jpg';
+import latest from '../assets/latest.png';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -41,7 +41,7 @@ const Navbar = () => {
             <div className="container mx-auto px-6 flex justify-between items-center">
                 <Link to="/" className="flex items-center gap-3 group">
                     <img
-                        src={logoNew}
+                        src={latest}
                         alt="Linear Academy Logo"
                         className="h-14 md:h-20 w-auto object-contain transition-transform duration-500 group-hover:scale-105"
                     />
