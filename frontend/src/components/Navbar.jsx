@@ -43,7 +43,7 @@ const Navbar = () => {
                     <img
                         src={latest}
                         alt="Linear Academy Logo"
-                        className="h-28 md:h-48 w-auto object-contain transition-transform duration-500 group-hover:scale-105 -mt-2"
+                        className="h-32 md:h-48 w-auto object-contain transition-transform duration-500 group-hover:scale-105 -mt-2"
                     />
                 </Link>
 
