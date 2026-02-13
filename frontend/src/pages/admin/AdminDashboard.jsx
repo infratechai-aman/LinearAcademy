@@ -316,8 +316,16 @@ const StudentsManager = () => {
     };
 
     const handleDelete = async (id) => {
-        await endpoints.deleteStudent(id);
-        loadStudents();
+        if (window.confirm('Are you sure you want to delete this student?')) {
+            try {
+                await endpoints.deleteStudent(id);
+                loadStudents();
+                alert('Student deleted successfully');
+            } catch (error) {
+                console.error("Failed to delete student:", error);
+                alert("Failed to delete student. Please try again.");
+            }
+        }
     };
 
     return (
@@ -369,7 +377,8 @@ const StudentsManager = () => {
                     <div key={student.id} className="bg-white/5 border border-white/10 rounded-xl p-4 relative group">
                         <button
                             onClick={() => handleDelete(student.id)}
-                            className="absolute top-2 right-2 p-2 bg-red-500/80 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors z-10 opacity-80 hover:opacity-100"
+                            title="Delete Student"
                         >
                             <Trash2 size={16} />
                         </button>
