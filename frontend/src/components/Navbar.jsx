@@ -33,9 +33,9 @@ const Navbar = () => {
 
     return (
         <nav
-            className={`fixed w-full z-50 transition-all duration-500 ${scrolled
-                ? 'bg-luxury-black/95 backdrop-blur-xl border-b border-white/5 py-4 shadow-[0_4px_30px_rgba(0,0,0,0.1)]'
-                : 'bg-transparent py-6'
+            className={`fixed w-full z-50 transition-all duration-500 ease-in-out ${scrolled
+                ? 'bg-black/60 backdrop-blur-2xl border-b border-white/5 py-2 shadow-2xl'
+                : 'bg-transparent py-4'
                 }`}
         >
             <div className="container mx-auto px-6 flex justify-between items-center">
@@ -43,7 +43,7 @@ const Navbar = () => {
                     <img
                         src={latest}
                         alt="Linear Academy Logo"
-                        className="h-32 md:h-48 w-auto object-contain transition-transform duration-500 group-hover:scale-105 -mt-2"
+                        className={`w-auto object-contain transition-all duration-500 ease-in-out group-hover:scale-105 -mt-2 ${scrolled ? 'h-10 md:h-12' : 'h-16 md:h-24'}`}
                     />
                 </Link>
 
