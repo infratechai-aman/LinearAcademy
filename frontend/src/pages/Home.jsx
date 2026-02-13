@@ -3,7 +3,7 @@ import Hero from '../components/Hero';
 import StudentsSection from '../components/StudentsSection';
 import { motion } from 'framer-motion';
 import { Award, BookOpen, Users, TrendingUp } from 'lucide-react';
-import nav from '../assets/nav.png';
+import baner from '../assets/baner.png';
 
 const Home = () => {
     const features = [
@@ -68,8 +68,8 @@ const Home = () => {
                         <div className="absolute inset-0 border-2 border-luxury-gold/30 translate-x-4 translate-y-4 -z-10 transition-transform group-hover:translate-x-2 group-hover:translate-y-2" />
                         <div className="absolute inset-0 bg-luxury-gold/10 group-hover:bg-transparent transition-colors duration-500 z-10" />
                         <img
-                            src={nav}
-                            alt="Linear Academy Flyer"
+                            src={baner}
+                            alt="Linear Academy Banner"
                             className="w-full h-[500px] object-contain shadow-2xl transition-all duration-700 hover:scale-105"
                         />
                     </motion.div>
