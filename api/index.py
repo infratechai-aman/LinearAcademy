@@ -517,6 +517,7 @@ if DB_AVAILABLE and schemas is not None:
         data_uri = f"data:{content_type};base64,{encoded_string}"
         return {"url": data_uri, "message": "Image converted to Base64 (Serverless compatible)"}
 
+
     @app.post("/api/upload-pdf")
     async def upload_pdf(file: UploadFile = File(...)):
         if not file.filename.endswith('.pdf'):
@@ -526,5 +527,54 @@ if DB_AVAILABLE and schemas is not None:
             "file_size": "Unknown",
             "message": "Use cloud storage in production"
         }
+
+    # ================== EMERGENCY DATA FIX ==================
+    @app.post("/api/fix-server-images")
+    def fix_server_images(db: Session = Depends(get_db)):
+        """
+        Emergency Tool: Compresses all existing heavy student images in the database.
+        Call this ONCE to fix the 'disappearing students' issue.
+        """
+        try:
+            from PIL import Image
+            import io
+            import base64
+        except ImportError:
+            return {"error": "Pillow not installed. Please add 'Pillow' to requirements.txt"}
+
+        students = db.query(models.Student).all()
+        report = []
+        
+        for s in students:
+            if s.image_url and s.image_url.startswith("data:image"):
+                try:
+                    # 1. Decode
+                    header, encoded = s.image_url.split(",", 1)
+                    data = base64.b64decode(encoded)
+                    
+                    # 2. Check size (skip if already small < 500KB)
+                    if len(data) < 500 * 1024:
+                        report.append(f"Skipped Student {s.id} (Size ok: {len(data)//1024}KB)")
+                        continue
+
+                    # 3. Compress
+                    img = Image.open(io.BytesIO(data))
+                    img = img.convert("RGB") # Ensure RGB for JPEG
+                    img.thumbnail((800, 800)) # Resize max dim
+                    
+                    buffer = io.BytesIO()
+                    img.save(buffer, format="JPEG", quality=60, optimize=True)
+                    new_data = buffer.getvalue()
+                    
+                    # 4. Re-encode
+                    new_base64 = base64.b64encode(new_data).decode('utf-8')
+                    s.image_url = f"data:image/jpeg;base64,{new_base64}"
+                    
+                    report.append(f"Fixed Student {s.id}: {len(data)//1024}KB -> {len(new_data)//1024}KB")
+                    db.commit() # Commit each success immediately to avoid timeout rollback
+                except Exception as e:
+                    report.append(f"Error Student {s.id}: {str(e)}")
+        
+        return {"status": "Complete", "report": report}
 
 
