@@ -70,7 +70,7 @@ const Home = () => {
                         <img
                             src={baner}
                             alt="Linear Academy Banner"
-                            className="w-full h-auto md:h-[500px] object-contain shadow-2xl transition-all duration-700 hover:scale-105 filter invert hue-rotate-180 brightness-90 rounded-lg"
+                            className="w-full h-auto md:h-[500px] object-contain shadow-2xl transition-all duration-700 hover:scale-105 rounded-lg"
                         />
                     </motion.div>
                 </div>
