@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import StudentsSection from '../components/StudentsSection';
+import GallerySection from '../components/GallerySection';
 
 const About = () => {
     return (
@@ -61,6 +62,9 @@ const About = () => {
 
             {/* Students Section */}
             <StudentsSection />
+
+            {/* Gallery Section */}
+            <GallerySection />
         </div >
     );
 };
