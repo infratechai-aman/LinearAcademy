@@ -6,15 +6,18 @@ const StudentsSection = () => {
     const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {
+        // 0. Cleanup old bloated cache
+        localStorage.removeItem('students_data');
+
         // 1. Check Cache (Permanent)
-        const cachedData = localStorage.getItem('students_data');
+        const cachedData = localStorage.getItem('students_data_v2');
         if (cachedData) {
             try {
                 setStudents(JSON.parse(cachedData));
                 setLoading(false);
             } catch (e) {
                 console.error("Cache parse error", e);
-                localStorage.removeItem('students_data');
+                localStorage.removeItem('students_data_v2');
             }
         }
 
@@ -25,12 +28,24 @@ const StudentsSection = () => {
 
         import('../services/api').then(module => {
             module.endpoints.getStudents().then(res => {
-                setStudents(res.data);
-                // Cache the response permanently
+                const freshData = res.data;
+                // Only update state if different (optional optimization, but we just set it for now)
+                setStudents(freshData);
+
+                // 3. Smart Caching Strategy
                 try {
-                    localStorage.setItem('students_data', JSON.stringify(res.data));
+                    // A. Try storing full data (Images + Text)
+                    localStorage.setItem('students_data_v2', JSON.stringify(freshData));
                 } catch (err) {
-                    console.warn("LocalStorage Quota Exceeded", err);
+                    console.warn("Full cache quota exceeded. Falling back to text-only mode.");
+
+                    // B. Fallback: Store text only (strip images) so site loads instantly next time
+                    try {
+                        const textOnly = freshData.map(({ image_url, ...rest }) => rest);
+                        localStorage.setItem('students_data_v2', JSON.stringify(textOnly));
+                    } catch (e) {
+                        console.error("Critical: Even text cache failed.", e);
+                    }
                 }
             }).catch(err => console.error(err))
                 .finally(() => setLoading(false));
