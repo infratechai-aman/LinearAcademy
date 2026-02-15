@@ -302,8 +302,8 @@ const StudentsManager = () => {
                     const ctx = canvas.getContext('2d');
 
                     // Max dimensions
-                    const MAX_WIDTH = 1200;
-                    const MAX_HEIGHT = 1200;
+                    const MAX_WIDTH = 600;
+                    const MAX_HEIGHT = 600;
                     let width = img.width;
                     let height = img.height;
 

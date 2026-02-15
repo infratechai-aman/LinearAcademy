@@ -557,13 +557,13 @@ if DB_AVAILABLE and schemas is not None:
                         report.append(f"Skipped Student {s.id} (Size ok: {len(data)//1024}KB)")
                         continue
 
-                    # 3. Compress
+                    # 3. Compress (Aggressive for LocalStorage)
                     img = Image.open(io.BytesIO(data))
                     img = img.convert("RGB") # Ensure RGB for JPEG
-                    img.thumbnail((800, 800)) # Resize max dim
+                    img.thumbnail((400, 400)) # Resize to matching card size
                     
                     buffer = io.BytesIO()
-                    img.save(buffer, format="JPEG", quality=60, optimize=True)
+                    img.save(buffer, format="JPEG", quality=50, optimize=True)
                     new_data = buffer.getvalue()
                     
                     # 4. Re-encode
