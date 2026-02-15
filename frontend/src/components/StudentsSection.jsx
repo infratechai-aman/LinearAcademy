@@ -6,10 +6,32 @@ const StudentsSection = () => {
     const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {
-        // Dynamic import to avoid circular dependencies if any, though standard import is fine here
+        // 1. Check Cache (Permanent)
+        const cachedData = localStorage.getItem('students_data');
+        if (cachedData) {
+            try {
+                setStudents(JSON.parse(cachedData));
+                setLoading(false);
+            } catch (e) {
+                console.error("Cache parse error", e);
+                localStorage.removeItem('students_data');
+            }
+        }
+
+        // 2. Fetch Fresh Data (Always fetch in bg or if no cache)
+        // If we have cache, we still fetch to update, BUT we don't show loading.
+        // If NO cache, we show loading.
+        if (!cachedData) setLoading(true);
+
         import('../services/api').then(module => {
             module.endpoints.getStudents().then(res => {
                 setStudents(res.data);
+                // Cache the response permanently
+                try {
+                    localStorage.setItem('students_data', JSON.stringify(res.data));
+                } catch (err) {
+                    console.warn("LocalStorage Quota Exceeded", err);
+                }
             }).catch(err => console.error(err))
                 .finally(() => setLoading(false));
         });
