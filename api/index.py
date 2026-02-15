@@ -138,7 +138,56 @@ if DB_AVAILABLE and schemas is not None:
     # ================== STUDENTS ==================
     @app.get("/api/students")
     def read_students(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-        return crud.get_students(db, skip=skip, limit=limit)
+        students = crud.get_students(db, skip=skip, limit=limit)
+        # Transform to lightweight response (replace Base64 with URL)
+        results = []
+        for s in students:
+            # construct a dict to avoid modifying the DB object
+            s_dict = {
+                "id": s.id,
+                "name": s.name,
+                "rank": s.rank,
+                "description": s.description,
+                "is_active": s.is_active,
+                # If it has an image, point to the serving endpoint
+                # If no image, keep it None or empty
+                "image_url": f"/api/students/{s.id}/image" if s.image_url else None
+            }
+            results.append(s_dict)
+        return results
+
+    @app.get("/api/students/{student_id}/image")
+    def serve_student_image(student_id: int, db: Session = Depends(get_db)):
+        import base64
+        from fastapi.responses import Response
+        
+        student = crud.get_students(db, skip=0, limit=100000) # Naive, better to add get_student in crud but this works for now with filter
+        # actually crud.get_student doesn't exist? let's look at crud.py again or just use the loop
+        # crud.get_students returns list. 
+        # Wait, I should add crud.get_student(db, student_id)
+        # Let's just use direct DB query here for speed if crud is missing, or iterate (slow).
+        # Ah, crud.delete_student usage implies there is a way to get it? No taking a risk.
+        # safe way: use the db session directly if possible, or crud.
+        student = db.query(models.Student).filter(models.Student.id == student_id).first()
+        
+        if not student or not student.image_url:
+            # Return a default placeholder or 404
+            # For now, 404 is fine, frontend handles broken images
+             return Response(status_code=404)
+
+        try:
+            # Check if it's really base64
+            if "base64," in student.image_url:
+                header, encoded = student.image_url.split("base64,", 1)
+                data = base64.b64decode(encoded)
+                # Cache for 1 year (immutable images basically)
+                return Response(content=data, media_type="image/jpeg", headers={"Cache-Control": "public, max-age=31536000"})
+            else:
+                # API consumer might have sent a normal URL (?) just redirect or 404
+                return Response(status_code=404)
+        except Exception as e:
+            print(f"Image serving error: {e}")
+            return Response(status_code=500)
 
     @app.post("/api/students")
     def create_student(student: schemas.StudentCreate, db: Session = Depends(get_db)):

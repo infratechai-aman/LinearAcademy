@@ -8,16 +8,17 @@ const StudentsSection = () => {
     React.useEffect(() => {
         // 0. Cleanup old bloated cache
         localStorage.removeItem('students_data');
+        localStorage.removeItem('students_data_v2');
 
         // 1. Check Cache (Permanent)
-        const cachedData = localStorage.getItem('students_data_v2');
+        const cachedData = localStorage.getItem('students_data_v3');
         if (cachedData) {
             try {
                 setStudents(JSON.parse(cachedData));
                 setLoading(false);
             } catch (e) {
                 console.error("Cache parse error", e);
-                localStorage.removeItem('students_data_v2');
+                localStorage.removeItem('students_data_v3');
             }
         }
 
@@ -34,18 +35,10 @@ const StudentsSection = () => {
 
                 // 3. Smart Caching Strategy
                 try {
-                    // A. Try storing full data (Images + Text)
-                    localStorage.setItem('students_data_v2', JSON.stringify(freshData));
+                    // Store the data (Now lightweight URLs, so should always fit!)
+                    localStorage.setItem('students_data_v3', JSON.stringify(freshData));
                 } catch (err) {
-                    console.warn("Full cache quota exceeded. Falling back to text-only mode.");
-
-                    // B. Fallback: Store text only (strip images) so site loads instantly next time
-                    try {
-                        const textOnly = freshData.map(({ image_url, ...rest }) => rest);
-                        localStorage.setItem('students_data_v2', JSON.stringify(textOnly));
-                    } catch (e) {
-                        console.error("Critical: Even text cache failed.", e);
-                    }
+                    console.warn("Full cache quota exceeded.", err);
                 }
             }).catch(err => console.error(err))
                 .finally(() => setLoading(false));
