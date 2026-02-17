@@ -127,6 +127,17 @@ if DB_AVAILABLE and schemas is not None:
                     "email": "info@linearclasses.com", 
                     "address": "Sr no 253 khese park, Lane number 18D lohegaon pune 411032"
                 }
+            
+            # Hotfix: Enforce new contact info if old info is present
+            if "Nagpur" in config.address or "98765" in config.phone_number or "7028" in config.phone_number:
+                config.phone_number = "+91 87961 26936"
+                config.address = "Sr no 253 khese park, Lane number 18D lohegaon pune 411032"
+                try:
+                    db.commit()
+                    db.refresh(config)
+                except:
+                    pass # Ignore db errors, just return correct data
+            
             return config
         except Exception as e:
              raise HTTPException(status_code=500, detail=str(e))
