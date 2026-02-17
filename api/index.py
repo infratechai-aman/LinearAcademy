@@ -123,9 +123,9 @@ if DB_AVAILABLE and schemas is not None:
             if config is None:
                 return {
                     "id": 0,
-                    "phone_number": "+91 98765 43210", 
+                    "phone_number": "+91 87961 26936", 
                     "email": "info@linearclasses.com", 
-                    "address": "191, Nagpur Chawl, Yerawada, Pune - 411006, Maharashtra, India"
+                    "address": "Sr no 253 khese park, Lane number 18D lohegaon pune 411032"
                 }
             return config
         except Exception as e:

@@ -39,7 +39,7 @@ const Contact = () => {
                                     </div>
                                     <div>
                                         <h4 className="font-bold text-white">Address</h4>
-                                        <p className="text-gray-400">191, Nagpur Chawl,<br />Yerawada, Pune - 411006<br />Maharashtra, India</p>
+                                        <p className="text-gray-400">Sr no 253 khese park,<br />Lane number 18D lohegaon pune 411032</p>
                                     </div>
                                 </div>
                                 <div className="flex gap-4">
@@ -48,7 +48,7 @@ const Contact = () => {
                                     </div>
                                     <div>
                                         <h4 className="font-bold text-white">Phone</h4>
-                                        <p className="text-gray-400">+91 98765 43210</p>
+                                        <p className="text-gray-400">+91 87961 26936</p>
                                     </div>
                                 </div>
                                 <div className="flex gap-4">
@@ -166,7 +166,7 @@ const ContactForm = () => {
                     onChange={handleChange}
                     type="tel"
                     className="w-full border-b border-gray-600 py-2 focus:outline-none focus:border-luxury-gold transition-colors bg-transparent text-white placeholder-gray-600"
-                    placeholder="+91 98765 43210"
+                    placeholder="+91 87961 26936"
                 />
             </div>
             <div>

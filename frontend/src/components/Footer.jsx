@@ -5,9 +5,9 @@ import { endpoints } from '../services/api';
 
 const Footer = () => {
     const [config, setConfig] = useState({
-        phone_number: "+91 98765 43210",
+        phone_number: "+91 87961 26936",
         email: "info@linearclasses.com",
-        address: "191, Nagpur Chawl, Yerawada, Pune - 411006, Maharashtra, India",
+        address: "Sr no 253 khese park, Lane number 18D lohegaon pune 411032",
         facebook_url: "https://www.facebook.com/people/Linear-classes/100070855656498/",
         instagram_url: "https://www.instagram.com/linear_classes/",
         whatsapp_number: "",
@@ -41,7 +41,7 @@ const Footer = () => {
                             </span>
                         </Link>
                         <p className="text-gray-400 leading-relaxed">
-                            Empowering students with knowledge and discipline. The premier coaching institute in Yerawada for Science and Commerce.
+                            Empowering students with knowledge and discipline. The premier coaching institute in Lohegaon for Science and Commerce.
                         </p>
                         <div className="flex gap-4">
                             {config.instagram_url && (

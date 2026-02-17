@@ -51,7 +51,7 @@ const Home = () => {
                             Where Knowledge Meets <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-luxury-gold to-white">Innovation</span>
                         </h3>
                         <p className="text-gray-400 text-lg leading-relaxed mb-6">
-                            At Linear Academy, we believe education is an art form. Located in the heart of Yerawada, Pune, we provide a sanctuary for learning that transcends traditional coaching.
+                            At Linear Academy, we believe education is an art form. Located in the heart of Lohegaon, Pune, we provide a sanctuary for learning that transcends traditional coaching.
                         </p>
                         <p className="text-gray-400 text-lg leading-relaxed">
                             Our approach combines rigorous academic discipline with a supportive, inspiring environment, ensuring every student achieves their highest potential in Science and Commerce.

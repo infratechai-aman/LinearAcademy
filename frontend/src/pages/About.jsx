@@ -46,9 +46,9 @@ const About = () => {
                             </p>
                         </div>
 
-                        <h2 className="text-3xl mb-8 text-luxury-gold">Why Yerawada Chooses Us</h2>
+                        <h2 className="text-3xl mb-8 text-luxury-gold">Why Lohegaon Chooses Us</h2>
                         <p className="mb-6">
-                            Located conveniently in Nagpur Chawl, Yerawada, we have become the trusted choice for parents who demand the best for their children. Our facility is designed to be a sanctuary of focus, equipped with modern amenities while maintaining a warm, welcoming atmosphere.
+                            Located conveniently in Khese Park, Lohegaon, we have become the trusted choice for parents who demand the best for their children. Our facility is designed to be a sanctuary of focus, equipped with modern amenities while maintaining a warm, welcoming atmosphere.
                         </p>
                         <ul className="list-disc pl-6 space-y-4 mb-6 marker:text-luxury-gold">
                             <li><strong className="text-white">Experienced Faculty:</strong> Mentors with years of proven track records.</li>

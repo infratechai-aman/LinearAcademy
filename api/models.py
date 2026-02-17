@@ -12,9 +12,9 @@ class SiteConfig(Base):
     __tablename__ = "site_config"
 
     id = Column(Integer, primary_key=True, index=True)
-    phone_number = Column(String, default="+91 98765 43210")
+    phone_number = Column(String, default="+91 87961 26936")
     email = Column(String, default="info@linearclasses.com")
-    address = Column(Text, default="191, Nagpur Chawl, Yerawada, Pune - 411006, Maharashtra, India")
+    address = Column(Text, default="Sr no 253 khese park, Lane number 18D lohegaon pune 411032")
     facebook_url = Column(String, nullable=True)
     instagram_url = Column(String, nullable=True)
     whatsapp_number = Column(String, nullable=True)
