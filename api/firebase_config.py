@@ -2,10 +2,7 @@ import os
 import firebase_admin
 from firebase_admin import credentials, firestore, auth
 
-init_error = None
-
 def initialize_firebase():
-    global init_error
     if not firebase_admin._apps:
         try:
             # First check for an environment variable (used in Vercel)
@@ -24,8 +21,6 @@ def initialize_firebase():
                 
             firebase_admin.initialize_app(cred)
         except Exception as e:
-            import traceback
-            init_error = traceback.format_exc()
             print(f"Error initializing Firebase: {e}")
 
 # Initialize when imported
