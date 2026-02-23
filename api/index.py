@@ -711,9 +711,9 @@ Generate exactly 10 multiple choice questions for this chapter. The questions sh
 - Mix easy, medium, and hard difficulty levels
 
 Return ONLY a valid JSON object with a single key "questions" containing exactly 10 objects. Each object must have these exact keys:
-{
+{{
   "questions": [
-    {
+    {{
       "question": "The question text",
       "option_a": "Option A text",
       "option_b": "Option B text",
@@ -721,9 +721,9 @@ Return ONLY a valid JSON object with a single key "questions" containing exactly
       "option_d": "Option D text",
       "correct_option": "a",
       "explanation": "Brief explanation of why this is correct"
-    }
+    }}
   ]
-}
+}}
 
 The correct_option must be lowercase: "a", "b", "c", or "d".
 Return ONLY the JSON object, no other text."""
