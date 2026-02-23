@@ -108,6 +108,15 @@ def get_enquiries(db, skip: int = 0, limit: int = 100):
     docs = firestore_db.collection("enquiries").order_by("id", direction="DESCENDING").offset(skip).limit(limit).get()
     return list_to_objs(_docs_to_list(docs))
 
+def delete_enquiry(db, enquiry_id: int):
+    doc_ref = firestore_db.collection("enquiries").document(str(enquiry_id))
+    doc = doc_ref.get()
+    if doc.exists:
+        data = doc.to_dict()
+        doc_ref.delete()
+        return dict_to_obj(data)
+    return None
+
 # --- Admin ---
 def get_user_by_email(db, email: str): # Replacing getting admin by getting user by email which was used in login
     # In index.py login uses crud.get_user_by_email(db, email=request.username)

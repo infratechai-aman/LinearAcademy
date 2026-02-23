@@ -36,6 +36,7 @@ export const endpoints = {
     // Enquiries
     createEnquiry: (data) => api.post('/enquiries', data),
     getEnquiries: () => api.get('/enquiries'),
+    deleteEnquiry: (id) => api.delete(`/enquiries/${id}`),
 
     // Auth
     login: (data) => api.post('/login', data),

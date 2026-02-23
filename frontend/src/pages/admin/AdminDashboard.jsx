@@ -222,18 +222,30 @@ const DemoBookingsManager = () => {
 const EnquiriesManager = () => {
     const [enquiries, setEnquiries] = useState([]);
 
+    const fetchEnquiries = async () => {
+        try {
+            const res = await endpoints.getEnquiries();
+            setEnquiries(Array.isArray(res.data) ? res.data : []);
+        } catch (error) {
+            console.error("Failed to load enquiries:", error);
+            setEnquiries([]);
+        }
+    };
+
     useEffect(() => {
-        const fetchEnquiries = async () => {
-            try {
-                const res = await endpoints.getEnquiries();
-                setEnquiries(Array.isArray(res.data) ? res.data : []);
-            } catch (error) {
-                console.error("Failed to load enquiries:", error);
-                setEnquiries([]);
-            }
-        };
         fetchEnquiries();
     }, []);
+
+    const handleDeleteEnquiry = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this enquiry?")) return;
+        try {
+            await endpoints.deleteEnquiry(id);
+            setEnquiries(enquiries.filter(e => e.id !== id));
+        } catch (error) {
+            console.error("Failed to delete enquiry:", error);
+            alert("Failed to delete enquiry.");
+        }
+    };
 
     return (
         <div>
@@ -247,6 +259,7 @@ const EnquiriesManager = () => {
                             <th className="p-4">Course</th>
                             <th className="p-4">Message</th>
                             <th className="p-4">Date</th>
+                            <th className="p-4 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-white/10">
@@ -260,6 +273,14 @@ const EnquiriesManager = () => {
                                 <td className="p-4">{enq.course_interest}</td>
                                 <td className="p-4 text-sm text-gray-300 max-w-xs">{enq.message}</td>
                                 <td className="p-4 text-sm text-gray-400">{enq.created_at}</td>
+                                <td className="p-4 text-right">
+                                    <button
+                                        onClick={() => handleDeleteEnquiry(enq.id)}
+                                        className="text-red-400 hover:text-red-300 px-3 py-1 bg-red-400/10 hover:bg-red-400/20 rounded border border-red-400/20 transition-all text-sm font-medium"
+                                    >
+                                        Delete
+                                    </button>
+                                </td>
                             </tr>
                         ))}
                     </tbody>

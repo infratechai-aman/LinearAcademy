@@ -213,6 +213,13 @@ if DB_AVAILABLE and schemas is not None:
     def read_enquiries(skip: int = 0, limit: int = 100, db = Depends(get_db)):
         return crud.get_enquiries(db, skip=skip, limit=limit)
 
+    @app.delete("/api/enquiries/{enquiry_id}")
+    def delete_enquiry(enquiry_id: int, db = Depends(get_db)):
+        enq = crud.delete_enquiry(db, enquiry_id)
+        if not enq:
+            raise HTTPException(status_code=404, detail="Enquiry not found")
+        return enq
+
     # ================== DEMO BOOKINGS ==================
     @app.post("/api/demo-bookings")
     def create_demo_booking(booking: schemas.DemoBookingCreate, db = Depends(get_db)):
