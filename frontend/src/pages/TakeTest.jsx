@@ -424,6 +424,36 @@ const TakeTest = () => {
                                     );
                                 })}
                             </div>
+
+                            {/* Desktop/Inline Navigation */}
+                            <div className="hidden lg:flex items-center justify-between mt-8 pt-6 border-t border-white/10">
+                                <button
+                                    onClick={() => setCurrentQuestion(prev => Math.max(0, prev - 1))}
+                                    disabled={currentQuestion === 0}
+                                    className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 rounded-xl disabled:opacity-50 transition-colors font-bold"
+                                >
+                                    <ChevronLeft className="w-5 h-5" />
+                                    Previous
+                                </button>
+
+                                {currentQuestion === questions.length - 1 ? (
+                                    <button
+                                        onClick={handleSubmit}
+                                        className="flex items-center gap-2 px-8 py-3 bg-green-500 hover:bg-green-400 text-white rounded-xl font-bold transition-colors shadow-lg shadow-green-500/20"
+                                    >
+                                        <CheckCircle className="w-5 h-5" />
+                                        Submit Test
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => setCurrentQuestion(prev => Math.min(questions.length - 1, prev + 1))}
+                                        className="flex items-center gap-2 px-6 py-3 bg-luxury-gold hover:bg-white text-black rounded-xl font-bold transition-colors shadow-lg shadow-luxury-gold/20"
+                                    >
+                                        Next Question
+                                        <ChevronRight className="w-5 h-5" />
+                                    </button>
+                                )}
+                            </div>
                         </motion.div>
                     </AnimatePresence>
                 </div>
