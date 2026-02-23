@@ -96,6 +96,7 @@ const StudentsSection = () => {
                                 src={student.image_url || "https://via.placeholder.com/300x400"}
                                 alt={student.name}
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                loading="lazy"
                             />
                             <div className="absolute bottom-4 left-4 z-20">
                                 <span className="bg-luxury-gold text-black text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">

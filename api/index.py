@@ -48,6 +48,10 @@ import crud
 from firebase_config import get_db
 
 
+from fastapi.middleware.gzip import GZipMiddleware
+from functools import lru_cache
+import time
+
 # Create FastAPI app FIRST before any imports that might fail
 app = FastAPI(title="Linear Academy API", version="2.0")
 
@@ -59,6 +63,24 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Enable Gzip compression (minimum size 100 bytes)
+app.add_middleware(GZipMiddleware, minimum_size=100)
+
+# Simple in-memory cache helper
+_CACHE = {}
+CACHE_TTL = 300 # 5 minutes
+
+def get_cached_data(key):
+    if key in _CACHE:
+        val, expiry = _CACHE[key]
+        if time.time() < expiry:
+            return val
+        del _CACHE[key]
+    return None
+
+def set_cached_data(key, val, ttl=CACHE_TTL):
+    _CACHE[key] = (val, time.time() + ttl)
 
 # ================== ROOT ==================
 @app.get("/")
@@ -121,15 +143,22 @@ if DB_AVAILABLE and schemas is not None:
     # ================== SITE CONFIG ==================
     @app.get("/api/config")
     def read_config(db = Depends(get_db)):
+        cache_key = "site_config"
+        cached = get_cached_data(cache_key)
+        if cached:
+            return cached
+
         try:
             config = crud.get_site_config(db)
             if config is None:
-                return {
+                res = {
                     "id": 0,
                     "phone_number": "+91 87961 26936", 
                     "email": "info@linearclasses.com", 
                     "address": "Sr no 253 khese park, Lane number 18D lohegaon pune 411032"
                 }
+                set_cached_data(cache_key, res)
+                return res
             
             # Hotfix: Enforce new contact info if old info is present
             if "Nagpur" in config.address or "98765" in config.phone_number or "7028" in config.phone_number:
@@ -141,7 +170,9 @@ if DB_AVAILABLE and schemas is not None:
                 except:
                     pass # Ignore db errors, just return correct data
             
-            return config
+            res = dict(config) if hasattr(config, "__dict__") else config
+            set_cached_data(cache_key, res)
+            return res
         except Exception as e:
              raise HTTPException(status_code=500, detail=str(e))
 
@@ -152,6 +183,11 @@ if DB_AVAILABLE and schemas is not None:
     # ================== STUDENTS ==================
     @app.get("/api/students")
     def read_students(skip: int = 0, limit: int = 100, db = Depends(get_db)):
+        cache_key = f"students_{skip}_{limit}"
+        cached = get_cached_data(cache_key)
+        if cached:
+            return cached
+
         students = crud.get_students(db, skip=skip, limit=limit)
         # Transform to lightweight response (replace Base64 with URL)
         results = []
@@ -168,6 +204,8 @@ if DB_AVAILABLE and schemas is not None:
                 "image_url": f"/api/students/{s.id}/image" if s.image_url else None
             }
             results.append(s_dict)
+        
+        set_cached_data(cache_key, results)
         return results
 
     @app.get("/api/students/{student_id}/image")
