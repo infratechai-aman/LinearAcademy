@@ -925,7 +925,7 @@ Return ONLY the JSON object, no other text."""
             total_marks=num_questions,
             duration_minutes=15,
             passing_marks=int(num_questions * 0.4),
-            is_active=True
+            is_active=False
         ))
         
         # Create all questions
@@ -980,11 +980,13 @@ Return ONLY the JSON object, no other text."""
 
 @app.get("/api/generated-tests")
 def get_generated_tests(db = Depends(get_db)):
-    """List all MCQ tests with their series info, most recent first"""
+    """List all MCQ tests with their series info, most recent first. Include inactive ones for admin."""
     if not DB_AVAILABLE or db is None:
         return []
     try:
-        tests = crud.get_all_mcq_tests(db)
+        # We need custom logic to get ALL tests including inactive ones for the Admin Panel
+        docs = crud.firestore_db.collection("mcq_tests").get()
+        tests = crud._docs_to_list(docs)
         tests.sort(key=lambda x: x.get("id", 0), reverse=True)
         result = []
         for t in tests:
@@ -997,9 +999,26 @@ def get_generated_tests(db = Depends(get_db)):
                 "total_marks": t.get("total_marks"),
                 "duration_minutes": t.get("duration_minutes"),
                 "created_at": t.get("created_at"),
+                "is_active": t.get("is_active", True),
                 "series_title": series.get("title") if series else "Unknown"
             })
         return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/generated-tests/{test_id}/publish")
+def publish_generated_test(test_id: int, db = Depends(get_db)):
+    """Toggle a generated test to active (published)"""
+    if not DB_AVAILABLE or db is None:
+        raise HTTPException(status_code=503, detail="Database unavailable")
+    try:
+        doc_ref = crud.firestore_db.collection("mcq_tests").document(str(test_id))
+        doc = doc_ref.get()
+        if not doc.exists:
+            raise HTTPException(status_code=404, detail="Test not found")
+        
+        doc_ref.update({"is_active": True})
+        return {"message": "Test published successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -1013,7 +1032,7 @@ def delete_generated_test(test_id: int, db = Depends(get_db)):
         crud.delete_mcq_test(db, test_id)
         # Note: delete_mcq_test already deletes questions natively. Wait, we also need to delete TestAttempts?
         # We can implement that dynamically
-        docs = firestore_db.collection("test_attempts").where(filter=FieldFilter("test_id", "==", test_id)).get()
+        docs = crud.firestore_db.collection("test_attempts").where(filter=crud.FieldFilter("test_id", "==", test_id)).get()
         for doc in docs:
             doc.reference.delete()
         

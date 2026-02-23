@@ -114,6 +114,7 @@ export const endpoints = {
     getBoards: () => api.get('/boards'),
     generateMCQ: (data) => api.post('/generate-mcq', data, { timeout: 60000 }),
     getGeneratedTests: () => api.get('/generated-tests'),
+    publishGeneratedTest: (id) => api.post(`/generated-tests/${id}/publish`),
     deleteGeneratedTest: (id) => api.delete(`/generated-tests/${id}`),
     flipMCQ: (id, data) => api.post(`/questions/${id}/flip`, data, { timeout: 30000 }),
 };

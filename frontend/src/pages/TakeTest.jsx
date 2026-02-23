@@ -79,7 +79,7 @@ const TakeTest = () => {
     };
 
     const handleSubmit = async () => {
-        const timeTaken = (test.duration_minutes * 60) - timeRemaining;
+        const timeTaken = (parseInt(test?.duration_minutes || 0) * 60) - parseInt(timeRemaining || 0);
 
         try {
             const res = await endpoints.submitTest(testId, {
@@ -216,7 +216,7 @@ const TakeTest = () => {
                                                 <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${isCorrect ? 'bg-green-500' : 'bg-red-500'}`}>
                                                     {index + 1}
                                                 </span>
-                                                <p className="flex-1">{q.question_text}</p>
+                                                <p className="flex-1">{q.question_text || q.question}</p>
                                             </div>
                                             <div className="grid grid-cols-2 gap-2 ml-12">
                                                 {['a', 'b', 'c', 'd'].map((opt) => {
@@ -228,10 +228,10 @@ const TakeTest = () => {
                                                         <div
                                                             key={opt}
                                                             className={`p-3 rounded-lg text-sm ${isCorrectAnswer
-                                                                    ? 'bg-green-500/20 border-green-500 text-green-400'
-                                                                    : isUserAnswer
-                                                                        ? 'bg-red-500/20 border-red-500 text-red-400'
-                                                                        : 'bg-white/5 text-gray-400'
+                                                                ? 'bg-green-500/20 border-green-500 text-green-400'
+                                                                : isUserAnswer
+                                                                    ? 'bg-red-500/20 border-red-500 text-red-400'
+                                                                    : 'bg-white/5 text-gray-400'
                                                                 } border border-white/10`}
                                                         >
                                                             <span className="font-bold mr-2">{opt.toUpperCase()}.</span>
@@ -395,7 +395,7 @@ const TakeTest = () => {
 
                             {/* Question */}
                             <div className="bg-white/5 rounded-2xl p-6 mb-8 border border-white/10">
-                                <p className="text-xl leading-relaxed">{currentQ.question_text}</p>
+                                <p className="text-xl leading-relaxed">{currentQ.question_text || currentQ.question}</p>
                                 {currentQ.question_image_url && (
                                     <img src={currentQ.question_image_url} alt="Question" className="mt-4 max-w-full rounded-lg" />
                                 )}
@@ -412,8 +412,8 @@ const TakeTest = () => {
                                             key={opt}
                                             onClick={() => handleAnswer(opt)}
                                             className={`w-full p-4 rounded-xl text-left transition-all flex items-center gap-4 ${isSelected
-                                                    ? 'bg-luxury-gold text-black border-luxury-gold'
-                                                    : 'bg-white/5 border-white/10 hover:border-luxury-gold/50'
+                                                ? 'bg-luxury-gold text-black border-luxury-gold'
+                                                : 'bg-white/5 border-white/10 hover:border-luxury-gold/50'
                                                 } border`}
                                         >
                                             <span className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${isSelected ? 'bg-black/20' : 'bg-white/10'}`}>
@@ -437,8 +437,8 @@ const TakeTest = () => {
                                 key={q.id}
                                 onClick={() => setCurrentQuestion(index)}
                                 className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold transition-all ${currentQuestion === index
-                                        ? 'ring-2 ring-luxury-gold ring-offset-2 ring-offset-luxury-charcoal'
-                                        : ''
+                                    ? 'ring-2 ring-luxury-gold ring-offset-2 ring-offset-luxury-charcoal'
+                                    : ''
                                     } ${getStatusColor(getQuestionStatus(index))} ${flagged[q.id] ? 'border-2 border-yellow-400' : ''
                                     }`}
                             >

@@ -1007,6 +1007,25 @@ const MCQTestsManager = () => {
         }
     };
 
+    const [publishingTestId, setPublishingTestId] = useState(null);
+
+    const handlePublishTest = async (id) => {
+        setPublishingTestId(id);
+        try {
+            await endpoints.publishGeneratedTest(id);
+            alert("Test published and is now live!");
+            setExistingTests(prev => prev.map(test => test.id === id ? { ...test, is_active: true } : test));
+            if (generatedResult?.test?.id === id) {
+                setGeneratedResult(prev => ({ ...prev, test: { ...prev.test, is_active: true } }));
+            }
+        } catch (error) {
+            console.error("Publish failed:", error);
+            alert("Failed to publish test: " + (error.response?.data?.detail || error.message));
+        } finally {
+            setPublishingTestId(null);
+        }
+    };
+
     const handleFlipQuestion = async (q, idx) => {
         setFlippingQuestionId(idx);
         try {
@@ -1059,28 +1078,26 @@ const MCQTestsManager = () => {
     const boardColors = { "CBSE": "from-blue-500/20 to-blue-600/5", "ICSE": "from-purple-500/20 to-purple-600/5", "Maharashtra Board": "from-orange-500/20 to-orange-600/5" };
 
     return (
-        <div>
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
+        <div className="p-6 max-w-7xl mx-auto space-y-8">
+            <div className="flex items-center justify-between mb-8">
                 <div>
                     <h1 className="text-3xl font-serif text-luxury-gold flex items-center gap-3">
-                        <Brain className="w-8 h-8" />
-                        AI MCQ Generator
+                        <Brain size={32} /> AI MCQ Generator
                     </h1>
-                    <p className="text-gray-400 text-sm mt-1">Generate chapter-wise MCQ tests using AI</p>
+                    <p className="text-gray-400 mt-2">Generate chapter-wise MCQ tests using AI</p>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex bg-white/5 rounded-xl p-1 border border-white/10">
                     <button
                         onClick={() => setActiveView('generator')}
-                        className={`px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors ${activeView === 'generator' ? 'bg-luxury-gold text-black' : 'bg-white/10 text-gray-300 hover:bg-white/20'}`}
+                        className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold transition-all ${activeView === 'generator' ? 'bg-luxury-gold text-black shadow-lg shadow-luxury-gold/20' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
                     >
-                        <Sparkles size={16} /> Generator
+                        <Sparkles size={18} /> Generator
                     </button>
                     <button
                         onClick={() => setActiveView('tests')}
-                        className={`px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors ${activeView === 'tests' ? 'bg-luxury-gold text-black' : 'bg-white/10 text-gray-300 hover:bg-white/20'}`}
+                        className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold transition-all ${activeView === 'tests' ? 'bg-luxury-gold text-black shadow-lg shadow-luxury-gold/20' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
                     >
-                        <ClipboardList size={16} /> All Tests ({existingTests.length})
+                        <ClipboardList size={18} /> All Tests ({existingTests.length})
                     </button>
                 </div>
             </div>
@@ -1305,6 +1322,16 @@ const MCQTestsManager = () => {
                             </div>
 
                             <div className="flex gap-4 mt-6">
+                                {generatedResult.test && !generatedResult.test.is_active && (
+                                    <button
+                                        onClick={() => handlePublishTest(generatedResult.test.id)}
+                                        disabled={publishingTestId === generatedResult.test.id}
+                                        className="bg-green-500 text-white font-bold py-3 px-6 rounded-xl hover:bg-green-400 transition-colors flex items-center gap-2 disabled:opacity-50"
+                                    >
+                                        <CheckCircle size={16} />
+                                        {publishingTestId === generatedResult.test.id ? 'Publishing...' : 'Publish Test Live'}
+                                    </button>
+                                )}
                                 <button onClick={resetSelection} className="bg-luxury-gold text-black font-bold py-3 px-6 rounded-xl hover:bg-white transition-colors flex items-center gap-2">
                                     <Sparkles size={16} /> Generate Another
                                 </button>
@@ -1360,6 +1387,16 @@ const MCQTestsManager = () => {
                                             <span className="text-white font-bold block">{test.duration_minutes}</span>
                                             <span className="text-xs">Minutes</span>
                                         </div>
+                                        {!test.is_active && (
+                                            <button
+                                                onClick={() => handlePublishTest(test.id)}
+                                                disabled={publishingTestId === test.id}
+                                                className="p-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors disabled:opacity-50"
+                                                title="Publish Test Live"
+                                            >
+                                                <CheckCircle size={16} />
+                                            </button>
+                                        )}
                                         <button
                                             onClick={() => handleDeleteTest(test.id)}
                                             className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
