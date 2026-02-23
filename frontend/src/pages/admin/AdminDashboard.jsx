@@ -1137,19 +1137,21 @@ const MCQTestsManager = () => {
                         <div>
                             <h2 className="text-xl font-bold mb-4 text-white">Step 2: Select Class ({selectedBoard})</h2>
                             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                                {Object.keys(boardsData[selectedBoard] || {}).map((cls) => (
-                                    <div
-                                        key={cls}
-                                        onClick={() => setSelectedClass(cls)}
-                                        className="bg-gradient-to-br from-white/5 to-white/0 p-6 rounded-xl border border-white/10 hover:border-luxury-gold cursor-pointer transition-all group"
-                                    >
-                                        <div className="w-12 h-12 bg-luxury-gold/20 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                                            <BookOpen className="w-6 h-6 text-luxury-gold" />
+                                {Object.keys(boardsData[selectedBoard] || {})
+                                    .filter(cls => ["Class 5", "Class 6", "Class 7", "Class 8", "Class 9", "Class 10"].includes(cls))
+                                    .map((cls) => (
+                                        <div
+                                            key={cls}
+                                            onClick={() => setSelectedClass(cls)}
+                                            className="bg-gradient-to-br from-white/5 to-white/0 p-6 rounded-xl border border-white/10 hover:border-luxury-gold cursor-pointer transition-all group"
+                                        >
+                                            <div className="w-12 h-12 bg-luxury-gold/20 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                                <BookOpen className="w-6 h-6 text-luxury-gold" />
+                                            </div>
+                                            <h3 className="font-bold text-white">{cls}</h3>
+                                            <p className="text-xs text-gray-500 mt-1">{Object.keys(boardsData[selectedBoard][cls] || {}).length} subjects</p>
                                         </div>
-                                        <h3 className="font-bold text-white">{cls}</h3>
-                                        <p className="text-xs text-gray-500 mt-1">{Object.keys(boardsData[selectedBoard][cls] || {}).length} subjects</p>
-                                    </div>
-                                ))}
+                                    ))}
                             </div>
                         </div>
                     )}
