@@ -239,7 +239,11 @@ if DB_AVAILABLE and schemas is not None:
     # ================== ACADEMIC CLASSES ==================
     @app.get("/api/classes")
     def read_classes(db = Depends(get_db)):
-        return crud.get_academic_classes(db)
+        try:
+            return crud.get_academic_classes(db)
+        except Exception as e:
+            import traceback
+            return {"error": str(e), "traceback": traceback.format_exc()}
 
     @app.get("/api/classes/{class_id}")
     def read_class(class_id: int, db = Depends(get_db)):
