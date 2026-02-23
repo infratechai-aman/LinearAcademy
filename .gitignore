@@ -32,3 +32,4 @@ api/__pycache__/
 
 # Database
 *.db
+api/firebase_credentials.json

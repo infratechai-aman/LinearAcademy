@@ -24,16 +24,14 @@ except ImportError:
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 try:
-    from database import engine, SessionLocal, Base, get_db
+    from database import engine, SessionLocal, Base
     import models
-    import crud
     import schemas
     DB_AVAILABLE = True
 except ImportError:
     try:
-        from .database import engine, SessionLocal, Base, get_db
+        from .database import engine, SessionLocal, Base
         from . import models
-        from . import crud
         from . import schemas
         DB_AVAILABLE = True
     except ImportError:
@@ -44,6 +42,11 @@ except ImportError:
         models = None
         schemas = None
         print("Database modules not found. Running in safe mode.")
+
+# New Firestore imports
+import crud
+from firebase_config import get_db
+
 
 # Create FastAPI app FIRST before any imports that might fail
 app = FastAPI(title="Linear Academy API", version="2.0")
@@ -72,7 +75,7 @@ class LoginRequest(BaseModel):
 
 # ================== ADMIN AUTH (No DB required) ==================
 @app.post("/api/login")
-def login(request: LoginRequest, db: Session = Depends(get_db)):
+def login(request: LoginRequest, db = Depends(get_db)):
     # Hardcoded admin check (ALWAYS allowed, helps in recovery)
     if request.username == "amaan@linearacademy" and request.password == "Amaan@786":
          return {"access_token": "admin-super-secret-token", "token_type": "bearer", "user": {"username": "admin", "role": "admin"}}
@@ -113,11 +116,11 @@ if DB_AVAILABLE:
 
 # Only define database-dependent endpoints if DB is available
 if DB_AVAILABLE and schemas is not None:
-    from sqlalchemy.orm import Session
+    # Removed sqlalchemy dependency 
     
     # ================== SITE CONFIG ==================
     @app.get("/api/config")
-    def read_config(db: Session = Depends(get_db)):
+    def read_config(db = Depends(get_db)):
         try:
             config = crud.get_site_config(db)
             if config is None:
@@ -143,12 +146,12 @@ if DB_AVAILABLE and schemas is not None:
              raise HTTPException(status_code=500, detail=str(e))
 
     @app.post("/api/config")
-    def update_config(config: schemas.SiteConfigCreate, db: Session = Depends(get_db)):
+    def update_config(config: schemas.SiteConfigCreate, db = Depends(get_db)):
         return crud.create_or_update_site_config(db, config)
 
     # ================== STUDENTS ==================
     @app.get("/api/students")
-    def read_students(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    def read_students(skip: int = 0, limit: int = 100, db = Depends(get_db)):
         students = crud.get_students(db, skip=skip, limit=limit)
         # Transform to lightweight response (replace Base64 with URL)
         results = []
@@ -168,28 +171,21 @@ if DB_AVAILABLE and schemas is not None:
         return results
 
     @app.get("/api/students/{student_id}/image")
-    def serve_student_image(student_id: int, db: Session = Depends(get_db)):
+    def serve_student_image(student_id: int, db = Depends(get_db)):
         import base64
         from fastapi.responses import Response
         
-        student = crud.get_students(db, skip=0, limit=100000) # Naive, better to add get_student in crud but this works for now with filter
-        # actually crud.get_student doesn't exist? let's look at crud.py again or just use the loop
-        # crud.get_students returns list. 
-        # Wait, I should add crud.get_student(db, student_id)
-        # Let's just use direct DB query here for speed if crud is missing, or iterate (slow).
-        # Ah, crud.delete_student usage implies there is a way to get it? No taking a risk.
-        # safe way: use the db session directly if possible, or crud.
-        student = db.query(models.Student).filter(models.Student.id == student_id).first()
+        student = crud.get_student(db, student_id)
         
-        if not student or not student.image_url:
+        if not student or not student.get("image_url"):
             # Return a default placeholder or 404
             # For now, 404 is fine, frontend handles broken images
              return Response(status_code=404)
 
         try:
             # Check if it's really base64
-            if "base64," in student.image_url:
-                header, encoded = student.image_url.split("base64,", 1)
+            if "base64," in student.get("image_url", ""):
+                header, encoded = student.get("image_url").split("base64,", 1)
                 data = base64.b64decode(encoded)
                 # Cache for 1 year (immutable images basically)
                 return Response(content=data, media_type="image/jpeg", headers={"Cache-Control": "public, max-age=31536000"})
@@ -201,40 +197,40 @@ if DB_AVAILABLE and schemas is not None:
             return Response(status_code=500)
 
     @app.post("/api/students")
-    def create_student(student: schemas.StudentCreate, db: Session = Depends(get_db)):
+    def create_student(student: schemas.StudentCreate, db = Depends(get_db)):
         return crud.create_student(db, student)
 
     @app.delete("/api/students/{student_id}")
-    def delete_student(student_id: int, db: Session = Depends(get_db)):
+    def delete_student(student_id: int, db = Depends(get_db)):
         return crud.delete_student(db, student_id)
 
     # ================== ENQUIRIES ==================
     @app.post("/api/enquiries")
-    def create_enquiry(enquiry: schemas.EnquiryCreate, db: Session = Depends(get_db)):
+    def create_enquiry(enquiry: schemas.EnquiryCreate, db = Depends(get_db)):
         return crud.create_enquiry(db, enquiry)
 
     @app.get("/api/enquiries")
-    def read_enquiries(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    def read_enquiries(skip: int = 0, limit: int = 100, db = Depends(get_db)):
         return crud.get_enquiries(db, skip=skip, limit=limit)
 
     # ================== DEMO BOOKINGS ==================
     @app.post("/api/demo-bookings")
-    def create_demo_booking(booking: schemas.DemoBookingCreate, db: Session = Depends(get_db)):
+    def create_demo_booking(booking: schemas.DemoBookingCreate, db = Depends(get_db)):
         return crud.create_demo_booking(db, booking)
 
     @app.get("/api/demo-bookings")
-    def read_demo_bookings(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    def read_demo_bookings(skip: int = 0, limit: int = 100, db = Depends(get_db)):
         return crud.get_demo_bookings(db, skip=skip, limit=limit)
 
     @app.put("/api/demo-bookings/{booking_id}/status")
-    def update_booking_status(booking_id: int, status: str, db: Session = Depends(get_db)):
+    def update_booking_status(booking_id: int, status: str, db = Depends(get_db)):
         booking = crud.update_demo_booking_status(db, booking_id, status)
         if not booking:
             raise HTTPException(status_code=404, detail="Booking not found")
         return booking
 
     @app.delete("/api/demo-bookings/{booking_id}")
-    def delete_demo_booking(booking_id: int, db: Session = Depends(get_db)):
+    def delete_demo_booking(booking_id: int, db = Depends(get_db)):
         booking = crud.delete_demo_booking(db, booking_id)
         if not booking:
             raise HTTPException(status_code=404, detail="Booking not found")
@@ -242,62 +238,62 @@ if DB_AVAILABLE and schemas is not None:
 
     # ================== ACADEMIC CLASSES ==================
     @app.get("/api/classes")
-    def read_classes(db: Session = Depends(get_db)):
+    def read_classes(db = Depends(get_db)):
         return crud.get_academic_classes(db)
 
     @app.get("/api/classes/{class_id}")
-    def read_class(class_id: int, db: Session = Depends(get_db)):
+    def read_class(class_id: int, db = Depends(get_db)):
         cls = crud.get_academic_class(db, class_id)
         if not cls:
             raise HTTPException(status_code=404, detail="Class not found")
         return cls
 
     @app.post("/api/classes")
-    def create_class(academic_class: schemas.AcademicClassCreate, db: Session = Depends(get_db)):
+    def create_class(academic_class: schemas.AcademicClassCreate, db = Depends(get_db)):
         return crud.create_academic_class(db, academic_class)
 
     # ================== SUBJECTS ==================
     @app.get("/api/classes/{class_id}/subjects")
-    def read_subjects_by_class(class_id: int, db: Session = Depends(get_db)):
+    def read_subjects_by_class(class_id: int, db = Depends(get_db)):
         return crud.get_subjects_by_class(db, class_id)
 
     @app.get("/api/subjects")
-    def read_all_subjects(db: Session = Depends(get_db)):
+    def read_all_subjects(db = Depends(get_db)):
         return crud.get_all_subjects(db)
 
     @app.get("/api/subjects/{subject_id}")
-    def read_subject(subject_id: int, db: Session = Depends(get_db)):
+    def read_subject(subject_id: int, db = Depends(get_db)):
         subject = crud.get_subject(db, subject_id)
         if not subject:
             raise HTTPException(status_code=404, detail="Subject not found")
         return subject
 
     @app.post("/api/subjects")
-    def create_subject(subject: schemas.SubjectCreate, db: Session = Depends(get_db)):
+    def create_subject(subject: schemas.SubjectCreate, db = Depends(get_db)):
         return crud.create_subject(db, subject)
 
     # ================== TEST SERIES ==================
     @app.get("/api/subjects/{subject_id}/test-series")
-    def read_test_series_by_subject(subject_id: int, db: Session = Depends(get_db)):
+    def read_test_series_by_subject(subject_id: int, db = Depends(get_db)):
         return crud.get_test_series_by_subject(db, subject_id)
 
     @app.get("/api/test-series")
-    def read_all_test_series(db: Session = Depends(get_db)):
+    def read_all_test_series(db = Depends(get_db)):
         return crud.get_all_test_series(db)
 
     @app.get("/api/test-series/{series_id}")
-    def read_test_series(series_id: int, db: Session = Depends(get_db)):
+    def read_test_series(series_id: int, db = Depends(get_db)):
         series = crud.get_test_series(db, series_id)
         if not series:
             raise HTTPException(status_code=404, detail="Test series not found")
         return series
 
     @app.post("/api/test-series")
-    def create_test_series(series: schemas.TestSeriesCreate, db: Session = Depends(get_db)):
+    def create_test_series(series: schemas.TestSeriesCreate, db = Depends(get_db)):
         return crud.create_test_series(db, series)
 
     @app.delete("/api/test-series/{series_id}")
-    def delete_test_series(series_id: int, db: Session = Depends(get_db)):
+    def delete_test_series(series_id: int, db = Depends(get_db)):
         series = crud.delete_test_series(db, series_id)
         if not series:
             raise HTTPException(status_code=404, detail="Test series not found")
@@ -305,19 +301,19 @@ if DB_AVAILABLE and schemas is not None:
 
     # ================== PDF RESOURCES ==================
     @app.get("/api/test-series/{series_id}/pdfs")
-    def read_pdfs_by_series(series_id: int, db: Session = Depends(get_db)):
+    def read_pdfs_by_series(series_id: int, db = Depends(get_db)):
         return crud.get_pdfs_by_test_series(db, series_id)
 
     @app.get("/api/pdfs")
-    def read_all_pdfs(db: Session = Depends(get_db)):
+    def read_all_pdfs(db = Depends(get_db)):
         return crud.get_all_pdfs(db)
 
     @app.post("/api/pdfs")
-    def create_pdf(pdf: schemas.PDFResourceCreate, db: Session = Depends(get_db)):
+    def create_pdf(pdf: schemas.PDFResourceCreate, db = Depends(get_db)):
         return crud.create_pdf_resource(db, pdf)
 
     @app.delete("/api/pdfs/{pdf_id}")
-    def delete_pdf(pdf_id: int, db: Session = Depends(get_db)):
+    def delete_pdf(pdf_id: int, db = Depends(get_db)):
         pdf = crud.delete_pdf_resource(db, pdf_id)
         if not pdf:
             raise HTTPException(status_code=404, detail="PDF not found")
@@ -325,15 +321,15 @@ if DB_AVAILABLE and schemas is not None:
 
     # ================== MCQ TESTS ==================
     @app.get("/api/test-series/{series_id}/tests")
-    def read_tests_by_series(series_id: int, db: Session = Depends(get_db)):
+    def read_tests_by_series(series_id: int, db = Depends(get_db)):
         return crud.get_mcq_tests_by_test_series(db, series_id)
 
     @app.get("/api/tests")
-    def read_all_tests(db: Session = Depends(get_db)):
+    def read_all_tests(db = Depends(get_db)):
         return crud.get_all_mcq_tests(db)
 
     @app.get("/api/tests/{test_id}")
-    def read_test(test_id: int, admin: bool = False, db: Session = Depends(get_db)):
+    def read_test(test_id: int, admin: bool = False, db = Depends(get_db)):
         test = crud.get_mcq_test(db, test_id)
         if not test:
             raise HTTPException(status_code=404, detail="Test not found")
@@ -356,18 +352,18 @@ if DB_AVAILABLE and schemas is not None:
         }
 
     @app.post("/api/tests")
-    def create_test(test: schemas.MCQTestCreate, db: Session = Depends(get_db)):
+    def create_test(test: schemas.MCQTestCreate, db = Depends(get_db)):
         return crud.create_mcq_test(db, test)
 
     @app.put("/api/tests/{test_id}")
-    def update_test(test_id: int, test: schemas.MCQTestCreate, db: Session = Depends(get_db)):
+    def update_test(test_id: int, test: schemas.MCQTestCreate, db = Depends(get_db)):
         updated = crud.update_mcq_test(db, test_id, test)
         if not updated:
             raise HTTPException(status_code=404, detail="Test not found")
         return updated
 
     @app.delete("/api/tests/{test_id}")
-    def delete_test(test_id: int, db: Session = Depends(get_db)):
+    def delete_test(test_id: int, db = Depends(get_db)):
         test = crud.delete_mcq_test(db, test_id)
         if not test:
             raise HTTPException(status_code=404, detail="Test not found")
@@ -375,29 +371,29 @@ if DB_AVAILABLE and schemas is not None:
 
     # ================== MCQ QUESTIONS ==================
     @app.get("/api/tests/{test_id}/questions")
-    def read_questions(test_id: int, db: Session = Depends(get_db)):
+    def read_questions(test_id: int, db = Depends(get_db)):
         return crud.get_questions_by_test(db, test_id)
 
     @app.post("/api/questions")
-    def create_question(question: schemas.MCQQuestionCreate, db: Session = Depends(get_db)):
+    def create_question(question: schemas.MCQQuestionCreate, db = Depends(get_db)):
         return crud.create_mcq_question(db, question)
 
     @app.put("/api/questions/{question_id}")
-    def update_question(question_id: int, question: schemas.MCQQuestionCreate, db: Session = Depends(get_db)):
+    def update_question(question_id: int, question: schemas.MCQQuestionCreate, db = Depends(get_db)):
         updated = crud.update_mcq_question(db, question_id, question)
         if not updated:
             raise HTTPException(status_code=404, detail="Question not found")
         return updated
 
     @app.delete("/api/questions/{question_id}")
-    def delete_question(question_id: int, db: Session = Depends(get_db)):
+    def delete_question(question_id: int, db = Depends(get_db)):
         question = crud.delete_mcq_question(db, question_id)
         if not question:
             raise HTTPException(status_code=404, detail="Question not found")
         return {"message": "Question deleted"}
 
     @app.post("/api/seed")
-    def seed_database(db: Session = Depends(get_db)):
+    def seed_database(db = Depends(get_db)):
         messages = []
         try:
             # 0. RUN MIGRATION (Fix Image Uploads)
@@ -481,7 +477,7 @@ if DB_AVAILABLE and schemas is not None:
 
     # ================== TEST ATTEMPTS & SCORING ==================
     @app.post("/api/tests/{test_id}/submit")
-    def submit_test(test_id: int, attempt: schemas.TestAttemptCreate, time_taken: int = 0, db: Session = Depends(get_db)):
+    def submit_test(test_id: int, attempt: schemas.TestAttemptCreate, time_taken: int = 0, db = Depends(get_db)):
         test = crud.get_mcq_test(db, test_id)
         if not test:
             raise HTTPException(status_code=404, detail="Test not found")
@@ -526,14 +522,14 @@ if DB_AVAILABLE and schemas is not None:
         }
 
     @app.get("/api/test-attempts")
-    def read_test_attempts(test_id: Optional[int] = None, db: Session = Depends(get_db)):
+    def read_test_attempts(test_id: Optional[int] = None, db = Depends(get_db)):
         if test_id:
             return crud.get_test_attempts(db, test_id)
         return crud.get_all_test_attempts(db)
 
     # ================== COURSES ==================
     @app.get("/api/courses")
-    def read_courses(type: Optional[str] = None, db: Session = Depends(get_db)):
+    def read_courses(type: Optional[str] = None, db = Depends(get_db)):
         if type == "free":
             return crud.get_courses(db, is_free=True)
         elif type == "paid":
@@ -541,25 +537,25 @@ if DB_AVAILABLE and schemas is not None:
         return crud.get_courses(db)
 
     @app.get("/api/courses/{course_id}")
-    def read_course(course_id: int, db: Session = Depends(get_db)):
+    def read_course(course_id: int, db = Depends(get_db)):
         course = crud.get_course(db, course_id)
         if not course:
             raise HTTPException(status_code=404, detail="Course not found")
         return course
 
     @app.post("/api/courses")
-    def create_course(course: schemas.CourseCreate, db: Session = Depends(get_db)):
+    def create_course(course: schemas.CourseCreate, db = Depends(get_db)):
         return crud.create_course(db, course)
 
     @app.put("/api/courses/{course_id}")
-    def update_course(course_id: int, course: schemas.CourseCreate, db: Session = Depends(get_db)):
+    def update_course(course_id: int, course: schemas.CourseCreate, db = Depends(get_db)):
         updated = crud.update_course(db, course_id, course)
         if not updated:
             raise HTTPException(status_code=404, detail="Course not found")
         return updated
 
     @app.delete("/api/courses/{course_id}")
-    def delete_course(course_id: int, db: Session = Depends(get_db)):
+    def delete_course(course_id: int, db = Depends(get_db)):
         course = crud.delete_course(db, course_id)
         if not course:
             raise HTTPException(status_code=404, detail="Course not found")
@@ -590,7 +586,7 @@ if DB_AVAILABLE and schemas is not None:
 
     # ================== EMERGENCY DATA FIX ==================
     @app.post("/api/fix-server-images")
-    def fix_server_images(db: Session = Depends(get_db)):
+    def fix_server_images(db = Depends(get_db)):
         """
         Emergency Tool: Compresses all existing heavy student images in the database.
         Call this ONCE to fix the 'disappearing students' issue.
@@ -602,19 +598,19 @@ if DB_AVAILABLE and schemas is not None:
         except ImportError:
             return {"error": "Pillow not installed. Please add 'Pillow' to requirements.txt"}
 
-        students = db.query(models.Student).all()
+        students = crud.get_students(db, limit=1000)
         report = []
         
         for s in students:
-            if s.image_url and s.image_url.startswith("data:image"):
+            if s.get("image_url") and s.get("image_url").startswith("data:image"):
                 try:
                     # 1. Decode
-                    header, encoded = s.image_url.split(",", 1)
+                    header, encoded = s.get("image_url").split(",", 1)
                     data = base64.b64decode(encoded)
                     
                     # 2. Check size (skip if already small < 500KB)
                     if len(data) < 500 * 1024:
-                        report.append(f"Skipped Student {s.id} (Size ok: {len(data)//1024}KB)")
+                        report.append(f"Skipped Student {s.get('id')} (Size ok: {len(data)//1024}KB)")
                         continue
 
                     # 3. Compress (Aggressive for LocalStorage)
@@ -628,12 +624,13 @@ if DB_AVAILABLE and schemas is not None:
                     
                     # 4. Re-encode
                     new_base64 = base64.b64encode(new_data).decode('utf-8')
-                    s.image_url = f"data:image/jpeg;base64,{new_base64}"
+                    # Update in firestore
+                    new_url = f"data:image/jpeg;base64,{new_base64}"
+                    crud.firestore_db.collection("students").document(str(s.get('id'))).update({"image_url": new_url})
                     
-                    report.append(f"Fixed Student {s.id}: {len(data)//1024}KB -> {len(new_data)//1024}KB")
-                    db.commit() # Commit each success immediately to avoid timeout rollback
+                    report.append(f"Fixed Student {s.get('id')}: {len(data)//1024}KB -> {len(new_data)//1024}KB")
                 except Exception as e:
-                    report.append(f"Error Student {s.id}: {str(e)}")
+                    report.append(f"Error Student {s.get('id')}: {str(e)}")
         
         return {"status": "Complete", "report": report}
 
@@ -660,7 +657,7 @@ class GenerateMCQRequest(BaseModel):
     api_key: str = ""
 
 @app.post("/api/generate-mcq")
-def generate_mcq(request: GenerateMCQRequest, db: Session = Depends(get_db)):
+def generate_mcq(request: GenerateMCQRequest, db = Depends(get_db)):
     """Generate 10 MCQ questions using OpenAI for a given board/class/subject/chapter"""
     import datetime
     
@@ -765,65 +762,52 @@ Return ONLY the JSON array, no other text."""
         now = datetime.datetime.now().isoformat()
         
         # Find or create academic class
-        db_class = db.query(models.AcademicClass).filter(
-            models.AcademicClass.name == request.class_name
-        ).first()
+        classes = crud.get_academic_classes(db)
+        db_class = next((c for c in classes if c.get("name") == request.class_name), None)
         
         if not db_class:
-            db_class = models.AcademicClass(
+            db_class = crud.create_academic_class(db, schemas.AcademicClassCreate(
                 name=request.class_name,
                 display_name=request.class_name,
                 stream="science" if any(s in request.subject.lower() for s in ["physics", "chemistry", "biology"]) else None,
                 order_index=0
-            )
-            db.add(db_class)
-            db.flush()
+            ))
         
         # Find or create subject
-        db_subject = db.query(models.Subject).filter(
-            models.Subject.class_id == db_class.id,
-            models.Subject.name == request.subject
-        ).first()
+        subjects = crud.get_subjects_by_class(db, db_class.id)
+        db_subject = next((s for s in subjects if s.get("name") == request.subject), None)
         
         if not db_subject:
-            # Pick a default icon/color based on subject
             icons = {"Mathematics": "📐", "Physics": "⚡", "Chemistry": "🧪", "Biology": "🧬", "Science": "🔬", "English": "📖", "Social Science": "🌍"}
             colors = {"Mathematics": "#4CAF50", "Physics": "#2196F3", "Chemistry": "#FF9800", "Biology": "#8BC34A", "Science": "#2196F3", "English": "#9C27B0", "Social Science": "#FF5722"}
-            db_subject = models.Subject(
+            db_subject = crud.create_subject(db, schemas.SubjectCreate(
                 class_id=db_class.id,
                 name=request.subject,
                 icon=icons.get(request.subject, "📚"),
                 color=colors.get(request.subject, "#D4AF37"),
                 order_index=0
-            )
-            db.add(db_subject)
-            db.flush()
+            ))
         
         # Find or create test series for this subject
         series_title = f"{request.board} - {request.class_name} {request.subject}"
-        db_series = db.query(models.TestSeries).filter(
-            models.TestSeries.subject_id == db_subject.id,
-            models.TestSeries.title == series_title
-        ).first()
+        series_list = crud.get_test_series_by_subject(db, db_subject.id)
+        db_series = next((s for s in series_list if s.get("title") == series_title), None)
         
         if not db_series:
-            db_series = models.TestSeries(
+            db_series = crud.create_test_series(db, schemas.TestSeriesCreate(
                 subject_id=db_subject.id,
                 title=series_title,
                 description=f"AI-Generated MCQ tests for {request.board} {request.class_name} - {request.subject}",
                 is_free=True,
                 price=0,
-                order_index=0,
-                created_at=now
-            )
-            db.add(db_series)
-            db.flush()
+                order_index=0
+            ))
         
         # Create the MCQ test
         test_title = f"{request.chapter} ({request.board})"
         num_questions = len(questions_data)
         
-        db_test = models.MCQTest(
+        db_test = crud.create_mcq_test(db, schemas.MCQTestCreate(
             test_series_id=db_series.id,
             title=test_title,
             description=f"AI-Generated MCQ test for {request.board} - {request.class_name} - {request.subject} - {request.chapter}",
@@ -832,16 +816,13 @@ Return ONLY the JSON array, no other text."""
             total_marks=num_questions,
             duration_minutes=15,
             passing_marks=int(num_questions * 0.4),
-            is_active=True,
-            created_at=now
-        )
-        db.add(db_test)
-        db.flush()
+            is_active=True
+        ))
         
         # Create all questions
         saved_questions = []
         for idx, q in enumerate(questions_data):
-            db_question = models.MCQQuestion(
+            db_question = crud.create_mcq_question(db, schemas.MCQQuestionCreate(
                 test_id=db_test.id,
                 question_text=q.get("question", ""),
                 option_a=q.get("option_a", ""),
@@ -852,8 +833,7 @@ Return ONLY the JSON array, no other text."""
                 marks=1,
                 explanation=q.get("explanation", ""),
                 order_index=idx
-            )
-            db.add(db_question)
+            ))
             saved_questions.append({
                 "question_text": db_question.question_text,
                 "option_a": db_question.option_a,
@@ -863,8 +843,6 @@ Return ONLY the JSON array, no other text."""
                 "correct_option": db_question.correct_option,
                 "explanation": db_question.explanation
             })
-        
-        db.commit()
         
         return {
             "message": "MCQ test generated and saved successfully!",
@@ -891,24 +869,25 @@ Return ONLY the JSON array, no other text."""
 
 
 @app.get("/api/generated-tests")
-def get_generated_tests(db: Session = Depends(get_db)):
+def get_generated_tests(db = Depends(get_db)):
     """List all MCQ tests with their series info, most recent first"""
     if not DB_AVAILABLE or db is None:
         return []
     try:
-        tests = db.query(models.MCQTest).order_by(models.MCQTest.id.desc()).all()
+        tests = crud.get_all_mcq_tests(db)
+        tests.sort(key=lambda x: x.get("id", 0), reverse=True)
         result = []
         for t in tests:
-            series = db.query(models.TestSeries).filter(models.TestSeries.id == t.test_series_id).first()
+            series = crud.get_test_series(db, t.get("test_series_id"))
             result.append({
-                "id": t.id,
-                "title": t.title,
-                "description": t.description,
-                "total_questions": t.total_questions,
-                "total_marks": t.total_marks,
-                "duration_minutes": t.duration_minutes,
-                "created_at": t.created_at,
-                "series_title": series.title if series else "Unknown"
+                "id": t.get("id"),
+                "title": t.get("title"),
+                "description": t.get("description"),
+                "total_questions": t.get("total_questions"),
+                "total_marks": t.get("total_marks"),
+                "duration_minutes": t.get("duration_minutes"),
+                "created_at": t.get("created_at"),
+                "series_title": series.get("title") if series else "Unknown"
             })
         return result
     except Exception as e:
@@ -916,21 +895,18 @@ def get_generated_tests(db: Session = Depends(get_db)):
 
 
 @app.delete("/api/generated-tests/{test_id}")
-def delete_generated_test(test_id: int, db: Session = Depends(get_db)):
+def delete_generated_test(test_id: int, db = Depends(get_db)):
     """Delete a generated test and all its questions"""
     if not DB_AVAILABLE or db is None:
         raise HTTPException(status_code=503, detail="Database unavailable")
     try:
-        # Delete questions first
-        db.query(models.MCQQuestion).filter(models.MCQQuestion.test_id == test_id).delete()
-        # Delete test attempts
-        db.query(models.TestAttempt).filter(models.TestAttempt.test_id == test_id).delete()
-        # Delete the test
-        test = db.query(models.MCQTest).filter(models.MCQTest.id == test_id).first()
-        if not test:
-            raise HTTPException(status_code=404, detail="Test not found")
-        db.delete(test)
-        db.commit()
+        crud.delete_mcq_test(db, test_id)
+        # Note: delete_mcq_test already deletes questions natively. Wait, we also need to delete TestAttempts?
+        # We can implement that dynamically
+        docs = firestore_db.collection("test_attempts").where(filter=FieldFilter("test_id", "==", test_id)).get()
+        for doc in docs:
+            doc.reference.delete()
+        
         return {"message": "Test deleted successfully"}
     except HTTPException:
         raise

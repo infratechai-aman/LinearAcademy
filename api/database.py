@@ -60,11 +60,5 @@ def get_db():
         # Optional: verify connection is actually alive
         # db.execute(text("SELECT 1"))
         yield db
-    except Exception as e:
-        print(f"Database session error: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, 
-            detail="Database operation failed"
-        )
     finally:
         db.close()

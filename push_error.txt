@@ -1,0 +1,98 @@
+﻿git : remote: error: 
+GH013: Repository rule 
+violations found for 
+refs/heads/main.       
+ 
+At line:1 char:1
++ git push 2>&1 | 
+Out-File -FilePath 
+push_error.txt 
+-Encoding utf8
++ ~~~~~~~~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (remote: error   
+ : ...s/main.          
+  :String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+remote: 
+remote: - GITHUB PUSH 
+PROTECTION        
+remote:   ΓÇöΓÇöΓÇöΓÇöΓ
+ÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇö
+ΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇ
+öΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓ
+ÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇö
+ΓÇöΓÇöΓÇöΓÇöΓÇöΓÇö     
+   
+remote:     Resolve 
+the following 
+violations before 
+pushing again        
+remote: 
+remote:     - Push 
+cannot contain secrets 
+       
+remote: 
+remote:             
+remote:      (?) Learn 
+how to resolve a 
+blocked push        
+remote:      https://do
+cs.github.com/code-secu
+rity/secret-scanning/wo
+rking-with-secret-scann
+ing-and-push-protection
+/working-with-push-prot
+ection-from-the-command
+-line#resolving-a-block
+ed-push        
+remote:             
+remote:             
+remote:       ΓÇöΓÇö 
+Google Cloud Service 
+Account Credentials ΓÇö
+ΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇ
+öΓÇö        
+remote:        
+locations:        
+remote:          - 
+commit: a187d56661f3ca8
+b327fd0257f2f985fd32e90
+63        
+remote:            
+path: api/firebase_cred
+entials.json:1        
+remote:             
+remote:        (?) To 
+push, remove secret 
+from commit(s) or 
+follow this URL to 
+allow the secret.      
+  
+remote:        https://
+github.com/infratechai-
+aman/LinearAcademy/secu
+rity/secret-scanning/un
+block-secret/3A4i0tZoAb
+jLkM74uLaEVHRMHFv      
+  
+remote:             
+remote: 
+remote: 
+To https://github.com/i
+nfratechai-aman/LinearA
+cademy
+ ! [remote rejected] 
+main -> main (push 
+declined due to 
+repository rule 
+violations)
+error: failed to push 
+some refs to 'https://g
+ithub.com/infratechai-a
+man/LinearAcademy'

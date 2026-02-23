@@ -1011,8 +1011,8 @@ const MCQTestsManager = () => {
         return items;
     };
 
-    const boardIcons = { "CBSE": "🏫", "ICSE": "🎓", "Maharashtra Board": "🏛️", "UP Board": "📘", "Bihar Board": "📗" };
-    const boardColors = { "CBSE": "from-blue-500/20 to-blue-600/5", "ICSE": "from-purple-500/20 to-purple-600/5", "Maharashtra Board": "from-orange-500/20 to-orange-600/5", "UP Board": "from-green-500/20 to-green-600/5", "Bihar Board": "from-red-500/20 to-red-600/5" };
+    const boardIcons = { "CBSE": "🏫", "ICSE": "🎓", "Maharashtra Board": "🏛️" };
+    const boardColors = { "CBSE": "from-blue-500/20 to-blue-600/5", "ICSE": "from-purple-500/20 to-purple-600/5", "Maharashtra Board": "from-orange-500/20 to-orange-600/5" };
 
     return (
         <div>
@@ -1071,17 +1071,19 @@ const MCQTestsManager = () => {
                         <div>
                             <h2 className="text-xl font-bold mb-4 text-white">Step 1: Select Board</h2>
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                                {Object.keys(boardsData).map((board) => (
-                                    <div
-                                        key={board}
-                                        onClick={() => setSelectedBoard(board)}
-                                        className={`bg-gradient-to-br ${boardColors[board] || 'from-white/10 to-white/5'} p-6 rounded-xl border border-white/10 hover:border-luxury-gold cursor-pointer transition-all group text-center`}
-                                    >
-                                        <span className="text-4xl mb-3 block">{boardIcons[board] || '📚'}</span>
-                                        <h3 className="font-bold text-white group-hover:text-luxury-gold transition-colors">{board}</h3>
-                                        <p className="text-xs text-gray-500 mt-1">{Object.keys(boardsData[board]).length} classes</p>
-                                    </div>
-                                ))}
+                                {Object.keys(boardsData)
+                                    .filter(board => board !== "UP Board" && board !== "Bihar Board")
+                                    .map((board) => (
+                                        <div
+                                            key={board}
+                                            onClick={() => setSelectedBoard(board)}
+                                            className={`bg-gradient-to-br ${boardColors[board] || 'from-white/10 to-white/5'} p-6 rounded-xl border border-white/10 hover:border-luxury-gold cursor-pointer transition-all group text-center`}
+                                        >
+                                            <span className="text-4xl mb-3 block">{boardIcons[board] || '📚'}</span>
+                                            <h3 className="font-bold text-white group-hover:text-luxury-gold transition-colors">{board}</h3>
+                                            <p className="text-xs text-gray-500 mt-1">{Object.keys(boardsData[board]).length} classes</p>
+                                        </div>
+                                    ))}
                             </div>
                         </div>
                     )}
