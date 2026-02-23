@@ -940,6 +940,7 @@ const MCQTestsManager = () => {
     const [loadingTests, setLoadingTests] = useState(false);
     const [activeView, setActiveView] = useState('generator'); // 'generator' or 'tests'
     const [error, setError] = useState('');
+    const [flippingQuestionId, setFlippingQuestionId] = useState(null);
 
     useEffect(() => {
         loadBoardsData();
@@ -1003,6 +1004,28 @@ const MCQTestsManager = () => {
         } catch (err) {
             console.error("Delete failed:", err);
             alert("Failed to delete test");
+        }
+    };
+
+    const handleFlipQuestion = async (q, idx) => {
+        setFlippingQuestionId(idx);
+        try {
+            const res = await endpoints.flipMCQ(q.id, {
+                board: selectedBoard,
+                class_name: selectedClass,
+                subject: selectedSubject,
+                chapter: selectedChapter,
+                old_question_text: q.question_text || q.question,
+                api_key: ""
+            });
+            const updatedQuestions = [...generatedResult.questions];
+            updatedQuestions[idx] = res.data.question;
+            setGeneratedResult({ ...generatedResult, questions: updatedQuestions });
+        } catch (err) {
+            console.error("Flip failed:", err);
+            alert("Failed to flip question: " + (err.response?.data?.detail || err.message));
+        } finally {
+            setFlippingQuestionId(null);
         }
     };
 
@@ -1242,11 +1265,20 @@ const MCQTestsManager = () => {
                             <div className="space-y-4">
                                 {(generatedResult.questions || []).map((q, idx) => (
                                     <div key={idx} className="bg-white/5 rounded-xl border border-white/10 p-5">
-                                        <div className="flex items-start gap-3 mb-3">
-                                            <span className="w-8 h-8 bg-luxury-gold/20 rounded-lg flex items-center justify-center text-luxury-gold font-bold text-sm flex-shrink-0">
-                                                {idx + 1}
-                                            </span>
-                                            <p className="text-white font-medium">{q.question_text || q.question}</p>
+                                        <div className="flex items-start justify-between mb-3">
+                                            <div className="flex items-start gap-3">
+                                                <span className="w-8 h-8 bg-luxury-gold/20 rounded-lg flex items-center justify-center text-luxury-gold font-bold text-sm flex-shrink-0">
+                                                    {idx + 1}
+                                                </span>
+                                                <p className="text-white font-medium">{q.question_text || q.question}</p>
+                                            </div>
+                                            <button
+                                                onClick={() => handleFlipQuestion(q, idx)}
+                                                disabled={flippingQuestionId === idx}
+                                                className="bg-white/10 border border-white/20 text-white px-3 py-1.5 rounded-lg hover:bg-luxury-gold hover:text-black transition-colors disabled:opacity-50 text-xs font-bold whitespace-nowrap"
+                                            >
+                                                {flippingQuestionId === idx ? "Flipping..." : "🔄 Flip"}
+                                            </button>
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 ml-11">
                                             {['a', 'b', 'c', 'd'].map((opt) => (

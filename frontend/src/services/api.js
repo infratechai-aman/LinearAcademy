@@ -110,11 +110,12 @@ export const endpoints = {
     updateCourse: (id, data) => api.put(`/courses/${id}`, data),
     deleteCourse: (id) => api.delete(`/courses/${id}`),
 
-    // ================== AI MCQ GENERATION ==================
+    // ================== AI GENERATOR ==================
     getBoards: () => api.get('/boards'),
-    generateMCQ: (data) => api.post('/generate-mcq', data),
+    generateMCQ: (data) => api.post('/generate-mcq', data, { timeout: 60000 }),
     getGeneratedTests: () => api.get('/generated-tests'),
     deleteGeneratedTest: (id) => api.delete(`/generated-tests/${id}`),
+    flipMCQ: (id, data) => api.post(`/questions/${id}/flip`, data, { timeout: 30000 }),
 };
 
 export default api;

@@ -663,6 +663,104 @@ class GenerateMCQRequest(BaseModel):
     chapter: str
     api_key: str = ""
 
+class FlipMCQRequest(BaseModel):
+    board: str
+    class_name: str
+    subject: str
+    chapter: str
+    old_question_text: str
+    api_key: str = ""
+
+@app.post("/api/questions/{question_id}/flip")
+def flip_mcq_question(question_id: int, request: FlipMCQRequest, db = Depends(get_db)):
+    """Regenerate a single MCQ question and overwrite it in the database"""
+    if not DB_AVAILABLE:
+        raise HTTPException(status_code=500, detail="Database unavailable")
+    
+    # Verify the question exists first
+    doc_ref = crud.firestore_db.collection("mcq_questions").document(str(question_id))
+    doc = doc_ref.get()
+    if not doc.exists:
+        raise HTTPException(status_code=404, detail="Question not found")
+        
+    api_key = request.api_key.strip() if request.api_key.strip() else os.environ.get("OPENAI_API_KEY", "")
+    if not api_key:
+        raise HTTPException(status_code=400, detail="OpenAI API key is required")
+        
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"OpenAI init failed: {str(e)}")
+        
+    prompt = f"""You are an expert teacher creating MCQ questions for students.
+
+Board: {request.board}
+Class: {request.class_name}
+Subject: {request.subject}
+Chapter: {request.chapter}
+
+Generate exactly ONE multiple choice question for this chapter.
+It MUST be entirely DIFFERENT from this previous question we rejected:
+"{request.old_question_text}"
+
+Return ONLY a valid JSON object with a single key "question" containing exactly 1 object. Each object must have these exact keys:
+{{
+  "question": {{
+    "question": "The new question text",
+    "option_a": "Option A text",
+    "option_b": "Option B text",
+    "option_c": "Option C text",
+    "option_d": "Option D text",
+    "correct_option": "a",
+    "explanation": "Brief explanation of why this is correct"
+  }}
+}}
+Return ONLY the JSON object, no other text."""
+
+    try:
+        import json
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            response_format={"type": "json_object"},
+            messages=[
+                {"role": "system", "content": "You are a JSON-only question generator."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.8,
+            max_tokens=1000,
+        )
+        content = response.choices[0].message.content.strip()
+        parsed_data = json.loads(content)
+        q_data = parsed_data.get("question", {})
+        
+        if not q_data or "question" not in q_data:
+            raise HTTPException(status_code=500, detail="Invalid OpenAI response format")
+            
+        # Update in Firestore
+        updated_fields = {
+            "question_text": q_data.get("question", ""),
+            "option_a": q_data.get("option_a", ""),
+            "option_b": q_data.get("option_b", ""),
+            "option_c": q_data.get("option_c", ""),
+            "option_d": q_data.get("option_d", ""),
+            "correct_option": q_data.get("correct_option", "a").lower(),
+            "explanation": q_data.get("explanation", "")
+        }
+        doc_ref.update(updated_fields)
+        
+        # Return the new complete dict
+        final_data = doc.to_dict()
+        final_data.update(updated_fields)
+        final_data["id"] = int(question_id)
+        
+        return {
+            "message": "Question flipped successfully!",
+            "question": final_data
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to flip question: {str(e)}")
+
 @app.post("/api/generate-mcq")
 def generate_mcq(request: GenerateMCQRequest, db = Depends(get_db)):
     """Generate 10 MCQ questions using OpenAI for a given board/class/subject/chapter"""
@@ -846,6 +944,7 @@ Return ONLY the JSON object, no other text."""
                 order_index=idx
             ))
             saved_questions.append({
+                "id": db_question.id,
                 "question_text": db_question.question_text,
                 "option_a": db_question.option_a,
                 "option_b": db_question.option_b,
