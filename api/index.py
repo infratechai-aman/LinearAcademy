@@ -247,10 +247,12 @@ if DB_AVAILABLE and schemas is not None:
 
     @app.get("/api/classes/{class_id}")
     def read_class(class_id: int, db = Depends(get_db)):
-        cls = crud.get_academic_class(db, class_id)
-        if not cls:
-            raise HTTPException(status_code=404, detail="Class not found")
-        return cls
+        return crud.get_academic_class(db, class_id)
+        
+    @app.get("/api/debug-firebase")
+    def get_firebase_debug():
+        import firebase_config
+        return {"error": firebase_config.init_error, "creds_set": "FIREBASE_CREDENTIALS" in os.environ}
 
     @app.post("/api/classes")
     def create_class(academic_class: schemas.AcademicClassCreate, db = Depends(get_db)):
