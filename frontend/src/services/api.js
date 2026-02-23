@@ -108,6 +108,12 @@ export const endpoints = {
     createCourse: (data) => api.post('/courses', data),
     updateCourse: (id, data) => api.put(`/courses/${id}`, data),
     deleteCourse: (id) => api.delete(`/courses/${id}`),
+
+    // ================== AI MCQ GENERATION ==================
+    getBoards: () => api.get('/boards'),
+    generateMCQ: (data) => api.post('/generate-mcq', data),
+    getGeneratedTests: () => api.get('/generated-tests'),
+    deleteGeneratedTest: (id) => api.delete(`/generated-tests/${id}`),
 };
 
 export default api;

@@ -638,3 +638,302 @@ if DB_AVAILABLE and schemas is not None:
         return {"status": "Complete", "report": report}
 
 
+# ================== BOARDS DATA (No DB required) ==================
+try:
+    from boards_data import BOARDS_DATA
+except ImportError:
+    try:
+        from .boards_data import BOARDS_DATA
+    except ImportError:
+        BOARDS_DATA = {}
+
+@app.get("/api/boards")
+def get_boards():
+    """Return the full board → class → subject → chapter hierarchy"""
+    return BOARDS_DATA
+
+class GenerateMCQRequest(BaseModel):
+    board: str
+    class_name: str
+    subject: str
+    chapter: str
+    api_key: str = ""
+
+@app.post("/api/generate-mcq")
+def generate_mcq(request: GenerateMCQRequest, db: Session = Depends(get_db)):
+    """Generate 10 MCQ questions using OpenAI for a given board/class/subject/chapter"""
+    import datetime
+    
+    # Validate the inputs against boards data
+    if request.board not in BOARDS_DATA:
+        raise HTTPException(status_code=400, detail=f"Invalid board: {request.board}")
+    board_data = BOARDS_DATA[request.board]
+    if request.class_name not in board_data:
+        raise HTTPException(status_code=400, detail=f"Invalid class: {request.class_name}")
+    class_data = board_data[request.class_name]
+    if request.subject not in class_data:
+        raise HTTPException(status_code=400, detail=f"Invalid subject: {request.subject}")
+    chapters = class_data[request.subject]
+    if request.chapter not in chapters:
+        raise HTTPException(status_code=400, detail=f"Invalid chapter: {request.chapter}")
+    
+    # Use provided API key or fallback to hardcoded
+    api_key = request.api_key.strip() if request.api_key.strip() else os.environ.get("OPENAI_API_KEY", "")
+    if not api_key:
+        raise HTTPException(status_code=400, detail="OpenAI API key is required")
+    
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key)
+    except ImportError:
+        raise HTTPException(status_code=500, detail="OpenAI package not installed. Add 'openai' to requirements.txt")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"OpenAI initialization failed: {str(e)}")
+    
+    # Build the prompt
+    prompt = f"""You are an expert teacher creating MCQ questions for students.
+
+Board: {request.board}
+Class: {request.class_name}
+Subject: {request.subject}
+Chapter: {request.chapter}
+
+Generate exactly 10 multiple choice questions for this chapter. The questions should:
+- Be appropriate for the class level
+- Cover key concepts from the chapter
+- Have 4 options (A, B, C, D) each
+- Have exactly one correct answer
+- Include a brief explanation for the correct answer
+- Mix easy, medium, and hard difficulty levels
+
+Return ONLY a valid JSON array with exactly 10 objects. Each object must have these exact keys:
+[
+  {{
+    "question": "The question text",
+    "option_a": "Option A text",
+    "option_b": "Option B text",
+    "option_c": "Option C text",
+    "option_d": "Option D text",
+    "correct_option": "a",
+    "explanation": "Brief explanation of why this is correct"
+  }}
+]
+
+The correct_option must be lowercase: "a", "b", "c", or "d".
+Return ONLY the JSON array, no other text."""
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are a JSON-only question generator. Return ONLY valid JSON arrays."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            max_tokens=4000,
+        )
+        
+        content = response.choices[0].message.content.strip()
+        # Clean up markdown code blocks if present
+        if content.startswith("```"):
+            content = content.split("\n", 1)[1] if "\n" in content else content[3:]
+            if content.endswith("```"):
+                content = content[:-3]
+            content = content.strip()
+        
+        questions_data = json.loads(content)
+        
+        if not isinstance(questions_data, list) or len(questions_data) == 0:
+            raise HTTPException(status_code=500, detail="OpenAI returned invalid format")
+            
+    except json.JSONDecodeError as e:
+        raise HTTPException(status_code=500, detail=f"Failed to parse OpenAI response as JSON: {str(e)}")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"OpenAI API error: {str(e)}")
+    
+    # Now save to database
+    if not DB_AVAILABLE or db is None:
+        # Return without saving if DB is down
+        return {
+            "message": "Generated but DB unavailable - questions not saved",
+            "questions": questions_data
+        }
+    
+    try:
+        now = datetime.datetime.now().isoformat()
+        
+        # Find or create academic class
+        db_class = db.query(models.AcademicClass).filter(
+            models.AcademicClass.name == request.class_name
+        ).first()
+        
+        if not db_class:
+            db_class = models.AcademicClass(
+                name=request.class_name,
+                display_name=request.class_name,
+                stream="science" if any(s in request.subject.lower() for s in ["physics", "chemistry", "biology"]) else None,
+                order_index=0
+            )
+            db.add(db_class)
+            db.flush()
+        
+        # Find or create subject
+        db_subject = db.query(models.Subject).filter(
+            models.Subject.class_id == db_class.id,
+            models.Subject.name == request.subject
+        ).first()
+        
+        if not db_subject:
+            # Pick a default icon/color based on subject
+            icons = {"Mathematics": "📐", "Physics": "⚡", "Chemistry": "🧪", "Biology": "🧬", "Science": "🔬", "English": "📖", "Social Science": "🌍"}
+            colors = {"Mathematics": "#4CAF50", "Physics": "#2196F3", "Chemistry": "#FF9800", "Biology": "#8BC34A", "Science": "#2196F3", "English": "#9C27B0", "Social Science": "#FF5722"}
+            db_subject = models.Subject(
+                class_id=db_class.id,
+                name=request.subject,
+                icon=icons.get(request.subject, "📚"),
+                color=colors.get(request.subject, "#D4AF37"),
+                order_index=0
+            )
+            db.add(db_subject)
+            db.flush()
+        
+        # Find or create test series for this subject
+        series_title = f"{request.board} - {request.class_name} {request.subject}"
+        db_series = db.query(models.TestSeries).filter(
+            models.TestSeries.subject_id == db_subject.id,
+            models.TestSeries.title == series_title
+        ).first()
+        
+        if not db_series:
+            db_series = models.TestSeries(
+                subject_id=db_subject.id,
+                title=series_title,
+                description=f"AI-Generated MCQ tests for {request.board} {request.class_name} - {request.subject}",
+                is_free=True,
+                price=0,
+                order_index=0,
+                created_at=now
+            )
+            db.add(db_series)
+            db.flush()
+        
+        # Create the MCQ test
+        test_title = f"{request.chapter} ({request.board})"
+        num_questions = len(questions_data)
+        
+        db_test = models.MCQTest(
+            test_series_id=db_series.id,
+            title=test_title,
+            description=f"AI-Generated MCQ test for {request.board} - {request.class_name} - {request.subject} - {request.chapter}",
+            total_questions=num_questions,
+            questions_to_show=num_questions,
+            total_marks=num_questions,
+            duration_minutes=15,
+            passing_marks=int(num_questions * 0.4),
+            is_active=True,
+            created_at=now
+        )
+        db.add(db_test)
+        db.flush()
+        
+        # Create all questions
+        saved_questions = []
+        for idx, q in enumerate(questions_data):
+            db_question = models.MCQQuestion(
+                test_id=db_test.id,
+                question_text=q.get("question", ""),
+                option_a=q.get("option_a", ""),
+                option_b=q.get("option_b", ""),
+                option_c=q.get("option_c", ""),
+                option_d=q.get("option_d", ""),
+                correct_option=q.get("correct_option", "a").lower(),
+                marks=1,
+                explanation=q.get("explanation", ""),
+                order_index=idx
+            )
+            db.add(db_question)
+            saved_questions.append({
+                "question_text": db_question.question_text,
+                "option_a": db_question.option_a,
+                "option_b": db_question.option_b,
+                "option_c": db_question.option_c,
+                "option_d": db_question.option_d,
+                "correct_option": db_question.correct_option,
+                "explanation": db_question.explanation
+            })
+        
+        db.commit()
+        
+        return {
+            "message": "MCQ test generated and saved successfully!",
+            "test": {
+                "id": db_test.id,
+                "title": db_test.title,
+                "description": db_test.description,
+                "total_questions": db_test.total_questions,
+                "duration_minutes": db_test.duration_minutes,
+                "board": request.board,
+                "class_name": request.class_name,
+                "subject": request.subject,
+                "chapter": request.chapter,
+                "series_title": series_title
+            },
+            "questions": saved_questions
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to save to database: {str(e)}")
+
+
+@app.get("/api/generated-tests")
+def get_generated_tests(db: Session = Depends(get_db)):
+    """List all MCQ tests with their series info, most recent first"""
+    if not DB_AVAILABLE or db is None:
+        return []
+    try:
+        tests = db.query(models.MCQTest).order_by(models.MCQTest.id.desc()).all()
+        result = []
+        for t in tests:
+            series = db.query(models.TestSeries).filter(models.TestSeries.id == t.test_series_id).first()
+            result.append({
+                "id": t.id,
+                "title": t.title,
+                "description": t.description,
+                "total_questions": t.total_questions,
+                "total_marks": t.total_marks,
+                "duration_minutes": t.duration_minutes,
+                "created_at": t.created_at,
+                "series_title": series.title if series else "Unknown"
+            })
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/api/generated-tests/{test_id}")
+def delete_generated_test(test_id: int, db: Session = Depends(get_db)):
+    """Delete a generated test and all its questions"""
+    if not DB_AVAILABLE or db is None:
+        raise HTTPException(status_code=503, detail="Database unavailable")
+    try:
+        # Delete questions first
+        db.query(models.MCQQuestion).filter(models.MCQQuestion.test_id == test_id).delete()
+        # Delete test attempts
+        db.query(models.TestAttempt).filter(models.TestAttempt.test_id == test_id).delete()
+        # Delete the test
+        test = db.query(models.MCQTest).filter(models.MCQTest.id == test_id).first()
+        if not test:
+            raise HTTPException(status_code=404, detail="Test not found")
+        db.delete(test)
+        db.commit()
+        return {"message": "Test deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
