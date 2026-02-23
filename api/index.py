@@ -710,27 +710,30 @@ Generate exactly 10 multiple choice questions for this chapter. The questions sh
 - Include a brief explanation for the correct answer
 - Mix easy, medium, and hard difficulty levels
 
-Return ONLY a valid JSON array with exactly 10 objects. Each object must have these exact keys:
-[
-  {{
-    "question": "The question text",
-    "option_a": "Option A text",
-    "option_b": "Option B text",
-    "option_c": "Option C text",
-    "option_d": "Option D text",
-    "correct_option": "a",
-    "explanation": "Brief explanation of why this is correct"
-  }}
-]
+Return ONLY a valid JSON object with a single key "questions" containing exactly 10 objects. Each object must have these exact keys:
+{
+  "questions": [
+    {
+      "question": "The question text",
+      "option_a": "Option A text",
+      "option_b": "Option B text",
+      "option_c": "Option C text",
+      "option_d": "Option D text",
+      "correct_option": "a",
+      "explanation": "Brief explanation of why this is correct"
+    }
+  ]
+}
 
 The correct_option must be lowercase: "a", "b", "c", or "d".
-Return ONLY the JSON array, no other text."""
+Return ONLY the JSON object, no other text."""
 
     try:
         response = client.chat.completions.create(
             model="gpt-4o-mini",
+            response_format={"type": "json_object"},
             messages=[
-                {"role": "system", "content": "You are a JSON-only question generator. Return ONLY valid JSON arrays."},
+                {"role": "system", "content": "You are a JSON-only question generator."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.7,
@@ -745,7 +748,8 @@ Return ONLY the JSON array, no other text."""
                 content = content[:-3]
             content = content.strip()
         
-        questions_data = json.loads(content)
+        parsed_data = json.loads(content)
+        questions_data = parsed_data.get("questions", [])
         
         if not isinstance(questions_data, list) or len(questions_data) == 0:
             raise HTTPException(status_code=500, detail="OpenAI returned invalid format")
