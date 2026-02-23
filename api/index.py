@@ -343,17 +343,17 @@ if DB_AVAILABLE and schemas is not None:
         all_questions = crud.get_questions_by_test(db, test_id)
         
         if admin:
-            questions = [q.__dict__ for q in all_questions]
+            questions = [dict(q) for q in all_questions]
         else:
             questions_to_show = getattr(test, 'questions_to_show', 10) or 10
             if len(all_questions) <= questions_to_show:
                 selected = all_questions
             else:
                 selected = random.sample(all_questions, questions_to_show)
-            questions = [q.__dict__ for q in selected]
+            questions = [dict(q) for q in selected]
         
         return {
-            **test.__dict__,
+            **dict(test),
             "questions": questions,
             "total_questions_in_bank": len(all_questions)
         }
