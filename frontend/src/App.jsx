@@ -11,6 +11,7 @@ const Courses = lazy(() => import('./pages/Courses'));
 const Contact = lazy(() => import('./pages/Contact'));
 const TestSeries = lazy(() => import('./pages/TestSeries'));
 const TakeTest = lazy(() => import('./pages/TakeTest'));
+const QuestionBank = lazy(() => import('./pages/QuestionBank'));
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 
@@ -32,6 +33,7 @@ function App() {
                         <Route path="about" element={<About />} />
                         <Route path="courses" element={<Courses />} />
                         <Route path="test-series" element={<TestSeries />} />
+                        <Route path="question-bank" element={<QuestionBank />} />
                         <Route path="contact" element={<Contact />} />
                     </Route>
                     {/* Test taking page - outside layout for fullscreen experience */}

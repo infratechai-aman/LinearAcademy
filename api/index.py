@@ -5,6 +5,7 @@ ULTRA-DEFENSIVE: Wraps all imports to prevent crashes on Vercel.
 """
 from fastapi import FastAPI, Depends, HTTPException, File, UploadFile, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from typing import Optional
 from pydantic import BaseModel
 import os
@@ -364,6 +365,22 @@ if DB_AVAILABLE and schemas is not None:
             raise HTTPException(status_code=404, detail="PDF not found")
         return {"message": "PDF deleted"}
 
+    # ================== QUESTION BANK ==================
+    @app.get("/api/question-bank/pdfs")
+    def read_question_bank_pdfs(board: str = None, class_name: str = None, subject_name: str = None, db = Depends(get_db)):
+        return crud.get_question_bank_pdfs(db, board=board, class_name=class_name, subject_name=subject_name)
+
+    @app.post("/api/question-bank/pdfs")
+    def create_question_bank_pdf(pdf: schemas.QuestionBankPDFCreate, db = Depends(get_db)):
+        return crud.create_question_bank_pdf(db, pdf)
+
+    @app.delete("/api/question-bank/pdfs/{pdf_id}")
+    def delete_question_bank_pdf(pdf_id: int, db = Depends(get_db)):
+        pdf = crud.delete_question_bank_pdf(db, pdf_id)
+        if not pdf:
+            raise HTTPException(status_code=404, detail="Question Bank PDF not found")
+        return {"message": "Question Bank PDF deleted"}
+
     # ================== MCQ TESTS ==================
     @app.get("/api/test-series/{series_id}/tests")
     def read_tests_by_series(series_id: int, db = Depends(get_db)):
@@ -623,11 +640,37 @@ if DB_AVAILABLE and schemas is not None:
     async def upload_pdf(file: UploadFile = File(...)):
         if not file.filename.endswith('.pdf'):
             raise HTTPException(status_code=400, detail="Only PDF files are allowed")
+        
+        # Save locally in a 'static' folder
+        static_dir = os.path.join(os.path.dirname(__file__), "static", "pdfs")
+        if not os.path.exists(static_dir):
+            os.makedirs(static_dir, exist_ok=True)
+            
+        file_extension = ".pdf"
+        file_id = str(uuid.uuid4())
+        filename = f"{file_id}{file_extension}"
+        file_path = os.path.join(static_dir, filename)
+        
+        contents = await file.read()
+        with open(file_path, "wb") as f:
+            f.write(contents)
+            
+        file_size_kb = len(contents) // 1024
+        
+        # Return the local URL
+        # Note: In production (Vercel), this local path won't persist.
+        # But for this demo/local development, it works great.
         return {
-            "url": f"https://placeholder.com/{uuid.uuid4()}.pdf",
-            "file_size": "Unknown",
-            "message": "Use cloud storage in production"
+            "url": f"/static/pdfs/{filename}",
+            "file_size": f"{file_size_kb} KB",
+            "message": "PDF uploaded successfully"
         }
+
+    # Mount static files AFTER routes so they don't override /api
+    # Check if directory exists first
+    static_path = os.path.join(os.path.dirname(__file__), "static")
+    if os.path.exists(static_path):
+        app.mount("/static", StaticFiles(directory=static_path), name="static")
 
     # ================== EMERGENCY DATA FIX ==================
     @app.post("/api/fix-server-images")

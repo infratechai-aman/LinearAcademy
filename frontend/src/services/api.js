@@ -117,6 +117,11 @@ export const endpoints = {
     publishGeneratedTest: (id) => api.post(`/generated-tests/${id}/publish`),
     deleteGeneratedTest: (id) => api.delete(`/generated-tests/${id}`),
     flipMCQ: (id, data) => api.post(`/questions/${id}/flip`, data, { timeout: 30000 }),
+
+    // Question Bank
+    getQuestionBankPDFs: (params) => api.get('/question-bank/pdfs', { params }),
+    createQuestionBankPDF: (data) => api.post('/question-bank/pdfs', data),
+    deleteQuestionBankPDF: (id) => api.delete(`/question-bank/pdfs/${id}`),
 };
 
 export default api;

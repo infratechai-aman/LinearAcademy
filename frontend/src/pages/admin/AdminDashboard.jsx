@@ -18,6 +18,7 @@ const AdminDashboard = () => {
         { id: 'enquiries', name: 'Enquiries', icon: MessageSquare },
         { id: 'test-series', name: 'Test Series', icon: BookOpen },
         { id: 'mcq-tests', name: 'MCQ Tests', icon: Brain },
+        { id: 'question-bank', name: 'Question Bank', icon: FileText },
         { id: 'courses', name: 'Courses', icon: PlayCircle },
         { id: 'settings', name: 'Site Settings', icon: Settings },
     ];
@@ -54,6 +55,7 @@ const AdminDashboard = () => {
 
                 {activeTab === 'test-series' && <TestSeriesManager />}
                 {activeTab === 'mcq-tests' && <MCQTestsManager />}
+                {activeTab === 'question-bank' && <QuestionBankManager />}
                 {activeTab === 'courses' && <CoursesManager />}
                 {activeTab === 'settings' && <SettingsManager />}
             </main>
@@ -923,6 +925,291 @@ const TestSeriesManager = () => {
                     )}
                 </div>
             )}
+        </div>
+    );
+};
+
+// Question Bank Manager - Manage PDFs organized by Board -> Class -> Subject
+const QuestionBankManager = () => {
+    const [boardsData, setBoardsData] = useState({});
+    const [selectedBoard, setSelectedBoard] = useState(null);
+    const [selectedClass, setSelectedClass] = useState(null);
+    const [selectedSubject, setSelectedSubject] = useState(null);
+    const [pdfs, setPdfs] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [showUploadForm, setShowUploadForm] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const [formData, setFormData] = useState({ title: '', description: '', file_url: '', file_size: '' });
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        loadBoardsData();
+    }, []);
+
+    useEffect(() => {
+        if (selectedBoard && selectedClass && selectedSubject) {
+            loadPdfs();
+        }
+    }, [selectedBoard, selectedClass, selectedSubject]);
+
+    const loadBoardsData = async () => {
+        try {
+            const res = await endpoints.getBoards();
+            setBoardsData(res.data || {});
+        } catch (err) {
+            console.error("Failed to load boards data:", err);
+            setError("Failed to load syllabus data");
+        }
+    };
+
+    const loadPdfs = async () => {
+        setLoading(true);
+        try {
+            const res = await endpoints.getQuestionBankPDFs({
+                board: selectedBoard,
+                class_name: selectedClass,
+                subject_name: selectedSubject
+            });
+            setPdfs(Array.isArray(res.data) ? res.data : []);
+        } catch (err) {
+            console.error("Failed to load PDFs:", err);
+            setPdfs([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setUploading(true);
+        const fd = new FormData();
+        fd.append('file', file);
+
+        try {
+            const res = await endpoints.uploadPDF(fd);
+            setFormData({ ...formData, file_url: res.data.url, file_size: res.data.file_size });
+        } catch (err) {
+            console.error("Upload failed:", err);
+            alert("Upload failed. Please try again.");
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleCreate = async (e) => {
+        e.preventDefault();
+        if (!formData.file_url) {
+            alert("Please upload a PDF first");
+            return;
+        }
+
+        try {
+            await endpoints.createQuestionBankPDF({
+                ...formData,
+                board: selectedBoard,
+                class_name: selectedClass,
+                subject_name: selectedSubject
+            });
+            setShowUploadForm(false);
+            setFormData({ title: '', description: '', file_url: '', file_size: '' });
+            loadPdfs();
+        } catch (err) {
+            console.error("Create failed:", err);
+            alert("Failed to save PDF details");
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!confirm('Delete this PDF from the question bank?')) return;
+        try {
+            await endpoints.deleteQuestionBankPDF(id);
+            loadPdfs();
+        } catch (err) {
+            console.error("Delete failed:", err);
+            alert("Failed to delete PDF");
+        }
+    };
+
+    const handleBack = () => {
+        if (showUploadForm) setShowUploadForm(false);
+        else if (selectedSubject) setSelectedSubject(null);
+        else if (selectedClass) setSelectedClass(null);
+        else if (selectedBoard) setSelectedBoard(null);
+    };
+
+    const getBreadcrumb = () => {
+        const items = [];
+        if (selectedBoard) items.push(selectedBoard);
+        if (selectedClass) items.push(selectedClass);
+        if (selectedSubject) items.push(selectedSubject);
+        return items;
+    };
+
+    const boardIcons = { "CBSE": "🏫", "ICSE": "🎓", "Maharashtra Board": "🏛️" };
+    const boardColors = { "CBSE": "from-blue-500/20 to-blue-600/5", "ICSE": "from-purple-500/20 to-purple-600/5", "Maharashtra Board": "from-orange-500/20 to-orange-600/5" };
+
+    return (
+        <div className="p-6 max-w-7xl mx-auto space-y-8">
+            <div className="flex items-center justify-between mb-8">
+                <div>
+                    <h1 className="text-3xl font-serif text-luxury-gold flex items-center gap-3">
+                        <FileText size={32} /> Question Bank
+                    </h1>
+                    <p className="text-gray-400 mt-2">Manage Board-wise PDF question banks</p>
+                </div>
+                {selectedSubject && (
+                    <button
+                        onClick={() => setShowUploadForm(true)}
+                        className="bg-luxury-gold text-black px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-luxury-gold/20 hover:scale-105 transition-all"
+                    >
+                        <Plus size={18} /> Upload PDF
+                    </button>
+                )}
+            </div>
+
+            {/* Selection Flow */}
+            <div className="space-y-6">
+                {getBreadcrumb().length > 0 && (
+                    <div className="flex items-center gap-2 mb-6 text-sm">
+                        <button onClick={() => { setSelectedBoard(null); setSelectedClass(null); setSelectedSubject(null); }} className="text-gray-400 hover:text-white">Question Bank</button>
+                        {getBreadcrumb().map((item, idx) => (
+                            <span key={idx} className="flex items-center gap-2">
+                                <ChevronRight size={14} className="text-gray-600" />
+                                <span className={idx === getBreadcrumb().length - 1 ? 'text-luxury-gold font-bold' : 'text-gray-400'}>{item}</span>
+                            </span>
+                        ))}
+                        <button onClick={handleBack} className="ml-auto text-gray-400 hover:text-white text-sm">← Back</button>
+                    </div>
+                )}
+
+                {!selectedBoard && (
+                    <div>
+                        <h2 className="text-xl font-bold mb-4 text-white">Step 1: Select Board</h2>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                            {Object.keys(boardsData)
+                                .filter(board => board !== "UP Board" && board !== "Bihar Board")
+                                .map((board) => (
+                                    <div
+                                        key={board}
+                                        onClick={() => setSelectedBoard(board)}
+                                        className={`bg-gradient-to-br ${boardColors[board] || 'from-white/10 to-white/5'} p-6 rounded-xl border border-white/10 hover:border-luxury-gold cursor-pointer transition-all group text-center`}
+                                    >
+                                        <span className="text-4xl mb-3 block">{boardIcons[board] || '📚'}</span>
+                                        <h3 className="font-bold text-white group-hover:text-luxury-gold transition-colors">{board}</h3>
+                                        <p className="text-xs text-gray-500 mt-1">{Object.keys(boardsData[board]).length} classes</p>
+                                    </div>
+                                ))}
+                        </div>
+                    </div>
+                )}
+
+                {selectedBoard && !selectedClass && (
+                    <div>
+                        <h2 className="text-xl font-bold mb-4 text-white">Step 2: Select Class ({selectedBoard})</h2>
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                            {Object.keys(boardsData[selectedBoard] || {}).map((cls) => (
+                                <div
+                                    key={cls}
+                                    onClick={() => setSelectedClass(cls)}
+                                    className="bg-white/5 p-6 rounded-xl border border-white/10 hover:border-luxury-gold cursor-pointer transition-all group"
+                                >
+                                    <div className="w-12 h-12 bg-luxury-gold/20 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                        <BookOpen className="w-6 h-6 text-luxury-gold" />
+                                    </div>
+                                    <h3 className="font-bold text-white">{cls}</h3>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {selectedBoard && selectedClass && !selectedSubject && (
+                    <div>
+                        <h2 className="text-xl font-bold mb-4 text-white">Step 3: Select Subject</h2>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {Object.keys(boardsData[selectedBoard]?.[selectedClass] || {}).map((subject) => {
+                                const subjectIcons = { "Mathematics": "📐", "Physics": "⚡", "Chemistry": "🧪", "Biology": "🧬", "Science": "🔬", "English": "📖", "Social Science": "🌍" };
+                                return (
+                                    <div
+                                        key={subject}
+                                        onClick={() => setSelectedSubject(subject)}
+                                        className="bg-white/5 p-6 rounded-xl border border-white/10 hover:border-luxury-gold cursor-pointer transition-all group"
+                                    >
+                                        <span className="text-3xl mb-3 block">{subjectIcons[subject] || '📚'}</span>
+                                        <h3 className="font-bold text-white">{subject}</h3>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+
+                {selectedSubject && (
+                    <div className="space-y-6">
+                        {showUploadForm && (
+                            <form onSubmit={handleCreate} className="bg-white/5 p-6 rounded-2xl border border-white/10 space-y-4 max-w-2xl">
+                                <h3 className="text-xl font-bold text-luxury-gold">Upload New PDF</h3>
+                                <input
+                                    placeholder="PDF Title (e.g., Chapter 1 Notes)"
+                                    value={formData.title}
+                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                    className="w-full bg-black/50 border border-gray-700 rounded-xl p-3 text-white focus:border-luxury-gold outline-none"
+                                    required
+                                />
+                                <textarea
+                                    placeholder="Description (optional)"
+                                    value={formData.description}
+                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                    className="w-full bg-black/50 border border-gray-700 rounded-xl p-3 text-white focus:border-luxury-gold outline-none h-24"
+                                />
+                                <div className="p-4 border-2 border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center gap-3">
+                                    <input type="file" accept=".pdf" onChange={handleFileUpload} className="hidden" id="pdf-upload" />
+                                    <label htmlFor="pdf-upload" className="cursor-pointer bg-white/10 px-4 py-2 rounded-lg hover:bg-white/20 transition-colors flex items-center gap-2">
+                                        <Upload size={18} /> {formData.file_url ? 'Change File' : 'Select PDF'}
+                                    </label>
+                                    {uploading && <Loader className="animate-spin text-luxury-gold" />}
+                                    {formData.file_url && <span className="text-green-400 text-sm">✓ File ready ({formData.file_size})</span>}
+                                </div>
+                                <div className="flex gap-3 pt-2">
+                                    <button type="submit" disabled={!formData.file_url || uploading} className="bg-luxury-gold text-black font-bold py-2.5 px-8 rounded-xl disabled:opacity-50">Save to Questions Bank</button>
+                                    <button type="button" onClick={() => setShowUploadForm(false)} className="text-gray-400 hover:text-white px-4">Cancel</button>
+                                </div>
+                            </form>
+                        )}
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {loading ? (
+                                <div className="col-span-full flex justify-center py-12"><Loader className="animate-spin text-luxury-gold" /></div>
+                            ) : pdfs.length === 0 ? (
+                                <div className="col-span-full text-center py-12 bg-white/5 rounded-2xl border border-white/10">
+                                    <FileText className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+                                    <p className="text-gray-400">No PDFs found for this subject. Upload your first one!</p>
+                                </div>
+                            ) : (
+                                pdfs.map((pdf) => (
+                                    <div key={pdf.id} className="bg-white/5 p-4 rounded-xl border border-white/10 flex items-center justify-between group hover:border-white/20 transition-all">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center text-red-500">
+                                                <FileText size={24} />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-white">{pdf.title}</h4>
+                                                <p className="text-xs text-gray-500">{pdf.file_size} • {new Date(pdf.created_at).toLocaleDateString()}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <a href={pdf.file_url} target="_blank" rel="noreferrer" className="p-2 bg-white/5 rounded-lg text-gray-400 hover:text-luxury-gold transition-colors"><Eye size={18} /></a>
+                                            <button onClick={() => handleDelete(pdf.id)} className="p-2 bg-white/5 rounded-lg text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={18} /></button>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

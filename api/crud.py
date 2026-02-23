@@ -563,3 +563,40 @@ def delete_course(db, course_id: int):
         doc_ref.delete()
         return dict_to_obj(data)
     return None
+
+# --- Question Bank PDF ---
+def create_question_bank_pdf(db, pdf: schemas.QuestionBankPDFCreate):
+    pdf_dict = pdf.dict()
+    docs = firestore_db.collection("question_bank_pdfs").order_by("id", direction="DESCENDING").limit(1).get()
+    new_id = 1
+    if docs:
+        new_id = docs[0].to_dict().get("id", 0) + 1
+        
+    pdf_dict["id"] = new_id
+    pdf_dict["created_at"] = datetime.datetime.now().isoformat()
+    pdf_dict["download_count"] = 0
+    pdf_dict["is_active"] = True
+    
+    firestore_db.collection("question_bank_pdfs").document(str(new_id)).set(pdf_dict)
+    return dict_to_obj(pdf_dict)
+
+def get_question_bank_pdfs(db, board: str = None, class_name: str = None, subject_name: str = None):
+    query = firestore_db.collection("question_bank_pdfs")
+    if board:
+        query = query.where(filter=FieldFilter("board", "==", board))
+    if class_name:
+        query = query.where(filter=FieldFilter("class_name", "==", class_name))
+    if subject_name:
+        query = query.where(filter=FieldFilter("subject_name", "==", subject_name))
+    
+    docs = query.order_by("id", direction="DESCENDING").get()
+    return list_to_objs(_docs_to_list(docs))
+
+def delete_question_bank_pdf(db, pdf_id: int):
+    doc_ref = firestore_db.collection("question_bank_pdfs").document(str(pdf_id))
+    doc = doc_ref.get()
+    if doc.exists:
+        data = doc.to_dict()
+        doc_ref.delete()
+        return dict_to_obj(data)
+    return None

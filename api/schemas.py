@@ -272,4 +272,25 @@ class SubjectWithTestSeries(Subject):
 class AcademicClassWithSubjects(AcademicClass):
     subjects: List[Subject] = []
 
+# --- Question Bank PDF ---
+class QuestionBankPDFBase(BaseModel):
+    board: str
+    class_name: str
+    subject_name: str
+    title: str
+    description: Optional[str] = None
+    file_url: str
+    file_size: Optional[str] = None
+
+class QuestionBankPDFCreate(QuestionBankPDFBase):
+    pass
+
+class QuestionBankPDF(QuestionBankPDFBase):
+    id: int
+    download_count: int = 0
+    is_active: bool = True
+    created_at: Optional[str] = None
+    class Config:
+        from_attributes = True
+
 

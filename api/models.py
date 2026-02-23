@@ -195,4 +195,20 @@ class Course(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(String)
 
+class QuestionBankPDF(Base):
+    """PDF question banks organized by Board, Class and Subject"""
+    __tablename__ = "question_bank_pdfs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    board = Column(String, index=True)  # e.g., "CBSE"
+    class_name = Column(String, index=True)  # e.g., "Class 10"
+    subject_name = Column(String, index=True)  # e.g., "Mathematics"
+    title = Column(String)
+    description = Column(Text, nullable=True)
+    file_url = Column(String)
+    file_size = Column(String, nullable=True)
+    download_count = Column(Integer, default=0)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(String)
+
 
