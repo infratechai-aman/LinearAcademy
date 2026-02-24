@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
     Users, Calendar, TestTube, FileText, Settings, BookOpen, Plus,
-    Trash2, Save, Download, Eye, Award, Monitor, Loader, PlayCircle, BarChart, ChevronRight, MessageSquare, Upload, Sparkles, Brain, RefreshCw
+    Trash2, Save, Download, Eye, Award, Monitor, Loader, PlayCircle, BarChart, ChevronRight, MessageSquare, Upload, Sparkles, Brain, RefreshCw,
+    LogOut, CheckCircle, XCircle, Clock, ClipboardList
 } from 'lucide-react';
 import api, { endpoints, downloadBase64Pdf } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
