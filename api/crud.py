@@ -194,8 +194,11 @@ def delete_demo_booking(db, booking_id: int):
 
 # ================== ACADEMIC CLASSES ==================
 
-def get_academic_classes(db):
-    docs = firestore_db.collection("academic_classes").where(filter=FieldFilter("is_active", "==", True)).get()
+def get_academic_classes(db, board: str = None):
+    ref = firestore_db.collection("academic_classes").where(filter=FieldFilter("is_active", "==", True))
+    if board:
+        ref = ref.where(filter=FieldFilter("board", "==", board))
+    docs = ref.get()
     objs = list_to_objs(_docs_to_list(docs))
     objs.sort(key=lambda x: x.get("order_index", 0))
     return objs
@@ -223,8 +226,11 @@ def create_academic_class(db, academic_class: schemas.AcademicClassCreate):
 
 # ================== SUBJECTS ==================
 
-def get_subjects_by_class(db, class_id: int):
-    docs = firestore_db.collection("subjects").where(filter=FieldFilter("class_id", "==", class_id)).where(filter=FieldFilter("is_active", "==", True)).get()
+def get_subjects_by_class(db, class_id: int, board: str = None):
+    ref = firestore_db.collection("subjects").where(filter=FieldFilter("class_id", "==", class_id)).where(filter=FieldFilter("is_active", "==", True))
+    if board:
+        ref = ref.where(filter=FieldFilter("board", "==", board))
+    docs = ref.get()
     objs = list_to_objs(_docs_to_list(docs))
     objs.sort(key=lambda x: x.get("order_index", 0))
     return objs

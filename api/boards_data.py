@@ -105,9 +105,7 @@ BOARDS_DATA = {
         "Class 7": cbse_7,
         "Class 8": cbse_8,
         "Class 9": cbse_9_10,
-        "Class 10": cbse_9_10,
-        "Class 11": class_11_12_science,
-        "Class 12": class_11_12_science
+        "Class 10": cbse_9_10
     },
     "Maharashtra Board": {
         "Class 5": ssc_5,
@@ -115,9 +113,7 @@ BOARDS_DATA = {
         "Class 7": ssc_7,
         "Class 8": ssc_8,
         "Class 9": ssc_9,
-        "Class 10": ssc_10,
-        "Class 11": class_11_12_science,
-        "Class 12": class_11_12_science
+        "Class 10": ssc_10
     },
     "ICSE": {
         "Class 5": cbse_5,
@@ -125,8 +121,6 @@ BOARDS_DATA = {
         "Class 7": cbse_7,
         "Class 8": cbse_8,
         "Class 9": cbse_9_10,
-        "Class 10": cbse_9_10,
-        "Class 11": class_11_12_science,
-        "Class 12": class_11_12_science
+        "Class 10": cbse_9_10
     }
 }

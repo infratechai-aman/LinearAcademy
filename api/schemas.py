@@ -93,6 +93,7 @@ class DemoBooking(DemoBookingBase):
 class AcademicClassBase(BaseModel):
     name: str
     display_name: str
+    board: Optional[str] = None
     stream: Optional[str] = None
     order_index: int = 0
     is_active: bool = True
@@ -110,6 +111,7 @@ class AcademicClass(AcademicClassBase):
 class SubjectBase(BaseModel):
     class_id: int
     name: str
+    board: Optional[str] = None
     icon: Optional[str] = None
     color: str = "#D4AF37"
     order_index: int = 0

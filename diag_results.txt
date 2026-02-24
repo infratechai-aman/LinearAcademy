@@ -1,0 +1,82 @@
+=== ACADEMIC CLASSES ===
+ID: 21, Name: Class 10, Display: Class 10, Board: None, Active: True, Order: 0
+ID: 22, Name: Test Class X, Display: Test Class X, Board: None, Active: True, Order: 0
+ID: 1, Name: class_8, Display: Class 8th, Board: None, Active: 1, Order: 1
+ID: 12, Name: Class 8, Display: Class 8th, Board: None, Active: 1, Order: 1
+ID: 13, Name: Class 9, Display: Class 9th, Board: None, Active: 1, Order: 2
+ID: 2, Name: class_9, Display: Class 9th, Board: None, Active: 1, Order: 2
+ID: 14, Name: Class 10, Display: Class 10th, Board: None, Active: 1, Order: 3
+ID: 3, Name: class_10, Display: Class 10th, Board: None, Active: 1, Order: 3
+ID: 15, Name: Class 11 Science, Display: Class 11th (Science), Board: None, Active: 1, Order: 4
+ID: 4, Name: class_11_science, Display: Class 11th - Science, Board: None, Active: 1, Order: 4
+ID: 16, Name: Class 11 Commerce, Display: Class 11th (Commerce), Board: None, Active: 1, Order: 5
+ID: 23, Name: Class 5, Display: 5th Standard, Board: CBSE, Active: True, Order: 5
+ID: 29, Name: Class 5, Display: 5th Standard, Board: Maharashtra Board, Active: True, Order: 5
+ID: 35, Name: Class 5, Display: 5th Standard, Board: ICSE, Active: True, Order: 5
+ID: 5, Name: class_11_commerce, Display: Class 11th - Commerce, Board: None, Active: 1, Order: 5
+ID: 17, Name: Class 11 Arts, Display: Class 11th (Arts), Board: None, Active: 1, Order: 6
+ID: 24, Name: Class 6, Display: 6th Standard, Board: CBSE, Active: True, Order: 6
+ID: 30, Name: Class 6, Display: 6th Standard, Board: Maharashtra Board, Active: True, Order: 6
+ID: 36, Name: Class 6, Display: 6th Standard, Board: ICSE, Active: True, Order: 6
+ID: 6, Name: class_12_science, Display: Class 12th - Science, Board: None, Active: 1, Order: 6
+ID: 18, Name: Class 12 Science, Display: Class 12th (Science), Board: None, Active: 1, Order: 7
+ID: 25, Name: Class 7, Display: 7th Standard, Board: CBSE, Active: True, Order: 7
+ID: 31, Name: Class 7, Display: 7th Standard, Board: Maharashtra Board, Active: True, Order: 7
+ID: 37, Name: Class 7, Display: 7th Standard, Board: ICSE, Active: True, Order: 7
+ID: 7, Name: class_12_commerce, Display: Class 12th - Commerce, Board: None, Active: 1, Order: 7
+ID: 19, Name: Class 12 Commerce, Display: Class 12th (Commerce), Board: None, Active: 1, Order: 8
+ID: 26, Name: Class 8, Display: 8th Standard, Board: CBSE, Active: True, Order: 8
+ID: 32, Name: Class 8, Display: 8th Standard, Board: Maharashtra Board, Active: True, Order: 8
+ID: 38, Name: Class 8, Display: 8th Standard, Board: ICSE, Active: True, Order: 8
+ID: 20, Name: Class 12 Arts, Display: Class 12th (Arts), Board: None, Active: 1, Order: 9
+ID: 27, Name: Class 9, Display: 9th Standard, Board: CBSE, Active: True, Order: 9
+ID: 33, Name: Class 9, Display: 9th Standard, Board: Maharashtra Board, Active: True, Order: 9
+ID: 39, Name: Class 9, Display: 9th Standard, Board: ICSE, Active: True, Order: 9
+ID: 28, Name: Class 10, Display: 10th Standard, Board: CBSE, Active: True, Order: 10
+ID: 34, Name: Class 10, Display: 10th Standard, Board: Maharashtra Board, Active: True, Order: 10
+ID: 40, Name: Class 10, Display: 10th Standard, Board: ICSE, Active: True, Order: 10
+ID: 10, Name: Test Class c94c, Display: Class Test c94c, Board: None, Active: 1, Order: 99
+ID: 11, Name: Test Class c7cb, Display: Class Test c7cb, Board: None, Active: 1, Order: 99
+ID: 8, Name: Test Class b087, Display: Class Test b087, Board: None, Active: 1, Order: 99
+ID: 9, Name: Test Class 37c2, Display: Class Test 37c2, Board: None, Active: False, Order: 99
+
+=== SUBJECTS ===
+ID: 1, ClassID: 1, Name: Science 1, Board: CBSE, Active: 1
+ID: 10, ClassID: 3, Name: Science 2, Board: CBSE, Active: 1
+ID: 11, ClassID: 3, Name: Maths 1, Board: CBSE, Active: 1
+ID: 12, ClassID: 3, Name: Maths 2, Board: CBSE, Active: 1
+ID: 13, ClassID: 4, Name: Physics, Board: None, Active: 1
+ID: 14, ClassID: 4, Name: Chemistry, Board: None, Active: 1
+ID: 15, ClassID: 4, Name: Biology, Board: None, Active: 1
+ID: 16, ClassID: 4, Name: Mathematics, Board: None, Active: 1
+ID: 17, ClassID: 5, Name: Accountancy, Board: None, Active: 1
+ID: 18, ClassID: 5, Name: Economics, Board: None, Active: 1
+ID: 19, ClassID: 5, Name: Business Studies, Board: None, Active: 1
+ID: 2, ClassID: 1, Name: Science 2, Board: CBSE, Active: 1
+ID: 20, ClassID: 5, Name: Mathematics, Board: None, Active: 1
+ID: 21, ClassID: 6, Name: Physics, Board: None, Active: 1
+ID: 22, ClassID: 6, Name: Chemistry, Board: None, Active: 1
+ID: 23, ClassID: 6, Name: Biology, Board: None, Active: 1
+ID: 24, ClassID: 6, Name: Mathematics, Board: None, Active: 1
+ID: 25, ClassID: 7, Name: Accountancy, Board: None, Active: 1
+ID: 26, ClassID: 7, Name: Economics, Board: None, Active: 1
+ID: 27, ClassID: 7, Name: Business Studies, Board: None, Active: 1
+ID: 28, ClassID: 7, Name: Mathematics, Board: None, Active: 1
+ID: 29, ClassID: 8, Name: Test Physics, Board: None, Active: 1
+ID: 3, ClassID: 1, Name: Maths 1, Board: CBSE, Active: 1
+ID: 30, ClassID: 9, Name: Test Physics, Board: None, Active: 1
+ID: 31, ClassID: 10, Name: Test Physics, Board: None, Active: 1
+ID: 32, ClassID: 11, Name: Test Physics, Board: None, Active: 1
+ID: 33, ClassID: 14, Name: Mathematics, Board: CBSE, Active: 1
+ID: 34, ClassID: 14, Name: Science, Board: CBSE, Active: 1
+ID: 35, ClassID: 14, Name: Social Science, Board: CBSE, Active: 1
+ID: 36, ClassID: 14, Name: English, Board: CBSE, Active: 1
+ID: 37, ClassID: 21, Name: Science and Technology Part 1, Board: Maharashtra Board, Active: True
+ID: 38, ClassID: 21, Name: History & Civics, Board: Maharashtra Board, Active: True
+ID: 39, ClassID: 21, Name: Science and Technology Part 2, Board: Maharashtra Board, Active: True
+ID: 4, ClassID: 1, Name: Maths 2, Board: CBSE, Active: 1
+ID: 5, ClassID: 2, Name: Science 1, Board: CBSE, Active: 1
+ID: 6, ClassID: 2, Name: Science 2, Board: CBSE, Active: 1
+ID: 7, ClassID: 2, Name: Maths 1, Board: CBSE, Active: 1
+ID: 8, ClassID: 2, Name: Maths 2, Board: CBSE, Active: 1
+ID: 9, ClassID: 3, Name: Science 1, Board: CBSE, Active: 1

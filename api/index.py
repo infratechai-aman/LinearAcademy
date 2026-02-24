@@ -323,8 +323,8 @@ if DB_AVAILABLE and schemas is not None:
 
     # ================== ACADEMIC CLASSES ==================
     @app.get("/api/classes")
-    def read_classes(db = Depends(get_db)):
-        return crud.get_academic_classes(db)
+    def read_classes(board: str = None, db = Depends(get_db)):
+        return crud.get_academic_classes(db, board=board)
 
     @app.get("/api/classes/{class_id}")
     def read_class(class_id: int, db = Depends(get_db)):
@@ -339,8 +339,8 @@ if DB_AVAILABLE and schemas is not None:
 
     # ================== SUBJECTS ==================
     @app.get("/api/classes/{class_id}/subjects")
-    def read_subjects_by_class(class_id: int, db = Depends(get_db)):
-        return crud.get_subjects_by_class(db, class_id)
+    def read_subjects_by_class(class_id: int, board: str = None, db = Depends(get_db)):
+        return crud.get_subjects_by_class(db, class_id, board=board)
 
     @app.get("/api/subjects")
     def read_all_subjects(db = Depends(get_db)):

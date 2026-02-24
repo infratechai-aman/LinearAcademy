@@ -58,12 +58,12 @@ export const endpoints = {
     // ================== TEST SERIES ==================
 
     // Academic Classes
-    getClasses: () => api.get('/classes'),
+    getClasses: (board = null) => api.get(`/classes${board ? `?board=${board}` : ''}`),
     getClass: (id) => api.get(`/classes/${id}`),
     createClass: (data) => api.post('/classes', data),
 
     // Subjects
-    getSubjectsByClass: (classId) => api.get(`/classes/${classId}/subjects`),
+    getSubjectsByClass: (classId, board = null) => api.get(`/classes/${classId}/subjects${board ? `?board=${board}` : ''}`),
     getAllSubjects: () => api.get('/subjects'),
     getSubject: (id) => api.get(`/subjects/${id}`),
     createSubject: (data) => api.post('/subjects', data),

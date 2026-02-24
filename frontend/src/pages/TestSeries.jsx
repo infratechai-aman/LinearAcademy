@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { endpoints } from '../services/api';
 
 const TestSeries = () => {
+    const [selectedBoard, setSelectedBoard] = useState(null);
     const [classes, setClasses] = useState([]);
     const [selectedClass, setSelectedClass] = useState(null);
     const [subjects, setSubjects] = useState([]);
@@ -14,16 +15,20 @@ const TestSeries = () => {
     const [pdfs, setPdfs] = useState([]);
     const [tests, setTests] = useState([]);
     const [activeTab, setActiveTab] = useState('pdfs');
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
+    const boardIcons = { "CBSE": "🏫", "ICSE": "🎓", "Maharashtra Board": "🏛️" };
+    const boardColors = { "CBSE": "from-blue-500/20 to-blue-600/5", "ICSE": "from-purple-500/20 to-purple-600/5", "Maharashtra Board": "from-orange-500/20 to-orange-600/5" };
+
     useEffect(() => {
-        loadClasses();
+        // No auto-load for classes anymore, Board selection first
     }, []);
 
-    const loadClasses = async () => {
+    const loadClasses = async (board) => {
+        setLoading(true);
         try {
-            const res = await endpoints.getClasses();
+            const res = await endpoints.getClasses(board);
             setClasses(res.data);
         } catch (error) {
             console.error(error);
@@ -32,9 +37,9 @@ const TestSeries = () => {
         }
     };
 
-    const loadSubjects = async (classId) => {
+    const loadSubjects = async (classId, board) => {
         try {
-            const res = await endpoints.getSubjectsByClass(classId);
+            const res = await endpoints.getSubjectsByClass(classId, board);
             setSubjects(res.data);
         } catch (error) {
             console.error(error);
@@ -66,11 +71,16 @@ const TestSeries = () => {
         }
     };
 
+    const handleBoardSelect = (board) => {
+        setSelectedBoard(board);
+        loadClasses(board);
+    };
+
     const handleClassSelect = (cls) => {
         setSelectedClass(cls);
         setSelectedSubject(null);
         setSelectedSeries(null);
-        loadSubjects(cls.id);
+        loadSubjects(cls.id, selectedBoard);
     };
 
     const handleSubjectSelect = (subject) => {
@@ -95,11 +105,15 @@ const TestSeries = () => {
         } else if (selectedClass) {
             setSelectedClass(null);
             setSubjects([]);
+        } else if (selectedBoard) {
+            setSelectedBoard(null);
+            setClasses([]);
         }
     };
 
     const getBreadcrumb = () => {
         const items = ['Test Series'];
+        if (selectedBoard) items.push(selectedBoard);
         if (selectedClass) items.push(selectedClass.display_name);
         if (selectedSubject) items.push(selectedSubject.name);
         if (selectedSeries) items.push(selectedSeries.title);
@@ -147,7 +161,7 @@ const TestSeries = () => {
             {/* Main Content */}
             <section className="container mx-auto px-6 py-8">
                 {/* Back Button */}
-                {(selectedClass || selectedSubject || selectedSeries) && (
+                {(selectedBoard || selectedClass || selectedSubject || selectedSeries) && (
                     <motion.button
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -160,8 +174,41 @@ const TestSeries = () => {
                 )}
 
                 <AnimatePresence mode="wait">
+                    {/* Board Selection */}
+                    {!selectedBoard && (
+                        <motion.div
+                            key="boards"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                        >
+                            <h2 className="text-2xl font-serif mb-8 text-white/90">Step 1: Select Your Board</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                {Object.keys(boardIcons).map((board, idx) => (
+                                    <motion.div
+                                        key={board}
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ delay: idx * 0.1 }}
+                                        onClick={() => handleBoardSelect(board)}
+                                        className={`relative overflow-hidden bg-gradient-to-br ${boardColors[board]} p-8 rounded-3xl border border-white/10 hover:border-luxury-gold/50 cursor-pointer transition-all group`}
+                                    >
+                                        <div className="relative z-10">
+                                            <span className="text-5xl mb-6 block transform group-hover:scale-110 transition-transform duration-500">{boardIcons[board]}</span>
+                                            <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-luxury-gold transition-colors">{board}</h3>
+                                            <p className="text-gray-400 text-sm">Explore test series for 6 core classes</p>
+                                        </div>
+                                        <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <ChevronRight className="text-luxury-gold" />
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        </motion.div>
+                    )}
+
                     {/* Class Selection */}
-                    {!selectedClass && (
+                    {selectedBoard && !selectedClass && (
                         <motion.div
                             key="classes"
                             initial={{ opacity: 0, y: 20 }}
@@ -169,28 +216,39 @@ const TestSeries = () => {
                             exit={{ opacity: 0, y: -20 }}
                         >
                             <h2 className="text-2xl font-serif mb-8">Select Your Class</h2>
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                                {Array.isArray(classes) && classes.map((cls, index) => (
-                                    <motion.div
-                                        key={cls.id}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: index * 0.05 }}
-                                        onClick={() => handleClassSelect(cls)}
-                                        className="bg-gradient-to-br from-white/5 to-white/0 p-6 rounded-2xl border border-white/10 hover:border-luxury-gold cursor-pointer transition-all group hover:shadow-lg hover:shadow-luxury-gold/10"
-                                    >
-                                        <div className="w-14 h-14 bg-gradient-to-br from-luxury-gold/20 to-luxury-gold/5 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                                            <BookOpen className="w-7 h-7 text-luxury-gold" />
-                                        </div>
-                                        <h3 className="text-xl font-bold mb-1">{cls.display_name}</h3>
-                                        {cls.stream && (
-                                            <span className="text-xs text-luxury-gold uppercase tracking-wider">
-                                                {cls.stream}
-                                            </span>
-                                        )}
-                                    </motion.div>
-                                ))}
-                            </div>
+                            {loading ? (
+                                <div className="text-center py-12">
+                                    <div className="animate-spin text-luxury-gold mb-4 inline-block">⌛</div>
+                                    <p className="text-gray-400">Loading classes...</p>
+                                </div>
+                            ) : classes.length === 0 ? (
+                                <div className="text-center py-12 bg-white/5 rounded-2xl border border-white/10">
+                                    <p className="text-gray-400">No classes available for this board yet.</p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                                    {Array.isArray(classes) && classes.map((cls, index) => (
+                                        <motion.div
+                                            key={cls.id}
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: index * 0.05 }}
+                                            onClick={() => handleClassSelect(cls)}
+                                            className="bg-gradient-to-br from-white/5 to-white/0 p-6 rounded-2xl border border-white/10 hover:border-luxury-gold cursor-pointer transition-all group hover:shadow-lg hover:shadow-luxury-gold/10"
+                                        >
+                                            <div className="w-14 h-14 bg-gradient-to-br from-luxury-gold/20 to-luxury-gold/5 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                                <BookOpen className="w-7 h-7 text-luxury-gold" />
+                                            </div>
+                                            <h3 className="text-xl font-bold mb-1">{cls.display_name}</h3>
+                                            {cls.stream && (
+                                                <span className="text-xs text-luxury-gold uppercase tracking-wider">
+                                                    {cls.stream}
+                                                </span>
+                                            )}
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            )}
                         </motion.div>
                     )}
 
