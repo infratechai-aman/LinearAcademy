@@ -16,6 +16,7 @@ const AdminDashboard = () => {
     const tabs = [
         { id: 'demo-bookings', name: 'Demo Bookings', icon: Calendar },
         { id: 'enquiries', name: 'Enquiries', icon: MessageSquare },
+        { id: 'students', name: 'Top Performers', icon: Users },
         { id: 'test-series', name: 'Test Series', icon: BookOpen },
         { id: 'mcq-tests', name: 'MCQ Tests', icon: Brain },
         { id: 'question-bank', name: 'Question Bank', icon: FileText },
@@ -52,6 +53,7 @@ const AdminDashboard = () => {
             <main className="flex-1 p-8 overflow-y-auto ml-64">
                 {activeTab === 'demo-bookings' && <DemoBookingsManager />}
                 {activeTab === 'enquiries' && <EnquiriesManager />}
+                {activeTab === 'students' && <StudentsManager />}
 
                 {activeTab === 'test-series' && <TestSeriesManager />}
                 {activeTab === 'mcq-tests' && <MCQTestsManager />}

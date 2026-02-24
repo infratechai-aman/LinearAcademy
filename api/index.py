@@ -222,15 +222,33 @@ if DB_AVAILABLE and schemas is not None:
              return Response(status_code=404)
 
         try:
-            # Check if it's really base64
-            if "base64," in student.get("image_url", ""):
-                header, encoded = student.get("image_url").split("base64,", 1)
+            image_url = student.get("image_url", "")
+            if not image_url:
+                 return Response(status_code=404)
+
+            # 1. Handle Base64 Data URI
+            if "base64," in image_url:
+                header, encoded = image_url.split("base64,", 1)
                 data = base64.b64decode(encoded)
-                # Cache for 1 year (immutable images basically)
                 return Response(content=data, media_type="image/jpeg", headers={"Cache-Control": "public, max-age=31536000"})
-            else:
-                # API consumer might have sent a normal URL (?) just redirect or 404
-                return Response(status_code=404)
+            
+            # 2. Handle Local File Path
+            elif image_url.startswith("uploads/"):
+                from fastapi.responses import FileResponse
+                # Path is relative to the 'static' directory
+                file_path = os.path.join(os.path.dirname(__file__), "static", image_url)
+                if os.path.exists(file_path):
+                    return FileResponse(file_path, headers={"Cache-Control": "public, max-age=31536000"})
+                else:
+                    print(f"File not found: {file_path}")
+                    return Response(status_code=404)
+                    
+            # 3. Handle External URL (Fallback)
+            elif image_url.startswith("http"):
+                 from fastapi.responses import RedirectResponse
+                 return RedirectResponse(url=image_url)
+
+            return Response(status_code=404)
         except Exception as e:
             print(f"Image serving error: {e}")
             return Response(status_code=500)
