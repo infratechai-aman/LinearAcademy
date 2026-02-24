@@ -596,8 +596,17 @@ def get_question_bank_pdfs(db, board: str = None, class_name: str = None, subjec
     if subject_name:
         query = query.where(filter=FieldFilter("subject_name", "==", subject_name))
     
-    docs = query.order_by("id", direction="DESCENDING").get()
-    return list_to_objs(_docs_to_list(docs))
+    # Firestore composite index limitation: Cannot order_by a field different from equality filters.
+    # Therefore, we fetch the docs and sort them in Python.
+    docs = query.get()
+    
+    # Convert to objects
+    results = list_to_objs(_docs_to_list(docs))
+    
+    # Sort descending by id
+    results.sort(key=lambda x: getattr(x, 'id', 0), reverse=True)
+    
+    return results
 
 def delete_question_bank_pdf(db, pdf_id: int):
     doc_ref = firestore_db.collection("question_bank_pdfs").document(str(pdf_id))
