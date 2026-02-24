@@ -124,7 +124,6 @@ const TestSeries = () => {
         <div className="pt-24 min-h-screen bg-luxury-black text-white">
             {/* Hero Section */}
             <section className="bg-gradient-to-br from-luxury-charcoal to-luxury-black py-16 relative overflow-hidden">
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10" />
                 <div className="absolute top-20 right-10 w-72 h-72 bg-luxury-gold/10 rounded-full blur-3xl" />
                 <div className="absolute bottom-0 left-10 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl" />
 

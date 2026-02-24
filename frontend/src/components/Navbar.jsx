@@ -28,7 +28,7 @@ const Navbar = () => {
         { name: 'About', path: '/about' },
         { name: 'Courses', path: '/courses' },
         { name: 'Question Bank', path: '/question-bank' },
-        { name: 'Test Series', path: '/test-series' },
+        { name: 'Test Series & MCQs', path: '/test-series' },
         { name: 'Contact', path: '/contact' },
     ];
 

@@ -547,6 +547,7 @@ const SettingsManager = () => {
 
 // Test Series Manager - Complete Rewrite with Visual Cards and PDF Upload
 const TestSeriesManager = () => {
+    const [selectedBoard, setSelectedBoard] = useState(null);
     const [classes, setClasses] = useState([]);
     const [subjects, setSubjects] = useState([]);
     const [series, setSeries] = useState([]);
@@ -560,7 +561,10 @@ const TestSeriesManager = () => {
     const [seriesFormData, setSeriesFormData] = useState({ title: '', description: '', is_free: true, price: 0 });
     const [pdfFormData, setPdfFormData] = useState({ title: '', description: '', file_url: '', file_size: '' });
 
-    useEffect(() => { loadClasses(); }, []);
+    const boardIcons = { "CBSE": "🏫", "ICSE": "🎓", "Maharashtra Board": "🏛️" };
+    const boardColors = { "CBSE": "from-blue-500/20 to-blue-600/5", "ICSE": "from-purple-500/20 to-purple-600/5", "Maharashtra Board": "from-orange-500/20 to-orange-600/5" };
+
+    useEffect(() => { /* No auto-load for classes */ }, []);
     useEffect(() => { if (selectedClass) loadSubjects(); }, [selectedClass]);
     useEffect(() => { if (selectedSubject) loadSeries(); }, [selectedSubject]);
     useEffect(() => { if (selectedSeries) loadPdfs(); }, [selectedSeries]);
@@ -575,10 +579,15 @@ const TestSeriesManager = () => {
         }
     };
 
-    const loadClasses = () => safelyLoad(endpoints.getClasses(), setClasses);
-    const loadSubjects = () => { if (selectedClass) safelyLoad(endpoints.getSubjectsByClass(selectedClass.id), setSubjects); };
+    const loadClasses = (board) => safelyLoad(endpoints.getClasses(board), setClasses);
+    const loadSubjects = () => { if (selectedClass) safelyLoad(endpoints.getSubjectsByClass(selectedClass.id, selectedBoard), setSubjects); };
     const loadSeries = () => { if (selectedSubject) safelyLoad(endpoints.getTestSeriesBySubject(selectedSubject.id), setSeries); };
     const loadPdfs = () => { if (selectedSeries) safelyLoad(endpoints.getPDFsByTestSeries(selectedSeries.id), setPdfs); };
+
+    const handleBoardSelect = (board) => {
+        setSelectedBoard(board);
+        loadClasses(board);
+    };
 
     const handleCreateSeries = async (e) => {
         e.preventDefault();
@@ -644,11 +653,13 @@ const TestSeriesManager = () => {
         if (selectedSeries) { setSelectedSeries(null); setPdfs([]); }
         else if (selectedSubject) { setSelectedSubject(null); setSeries([]); }
         else if (selectedClass) { setSelectedClass(null); setSubjects([]); }
+        else if (selectedBoard) { setSelectedBoard(null); setClasses([]); }
     };
 
     // Breadcrumb
     const getBreadcrumb = () => {
         const items = ['Test Series'];
+        if (selectedBoard) items.push(selectedBoard);
         if (selectedClass) items.push(selectedClass.display_name);
         if (selectedSubject) items.push(selectedSubject.name);
         if (selectedSeries) items.push(selectedSeries.title);
@@ -671,15 +682,34 @@ const TestSeriesManager = () => {
                         ))}
                     </div>
                 </div>
-                {selectedClass && (
+                {(selectedBoard || selectedClass) && (
                     <button onClick={handleBack} className="flex items-center gap-2 text-gray-400 hover:text-white">
                         ← Go Back
                     </button>
                 )}
             </div>
 
+            {/* Board Selection */}
+            {!selectedBoard && (
+                <div>
+                    <h2 className="text-xl font-bold mb-4 text-white">Select a Board</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {Object.keys(boardIcons).map((board) => (
+                            <button
+                                key={board}
+                                onClick={() => handleBoardSelect(board)}
+                                className={`flex flex-col items-center justify-center p-8 bg-gradient-to-br ${boardColors[board]} rounded-xl border border-white/10 hover:border-luxury-gold transition-colors`}
+                            >
+                                <span className="text-4xl mb-4">{boardIcons[board]}</span>
+                                <span className="font-bold">{board}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Class Selection - Visual Cards */}
-            {!selectedClass && (
+            {selectedBoard && !selectedClass && (
                 <div>
                     <h2 className="text-xl font-bold mb-4 text-white">Select a Class</h2>
 
