@@ -679,30 +679,22 @@ if DB_AVAILABLE and schemas is not None:
     async def upload_pdf(file: UploadFile = File(...)):
         if not file.filename.endswith('.pdf'):
             raise HTTPException(status_code=400, detail="Only PDF files are allowed")
-        
-        # Save locally in a 'static' folder
-        static_dir = os.path.join(os.path.dirname(__file__), "static", "pdfs")
-        if not os.path.exists(static_dir):
-            os.makedirs(static_dir, exist_ok=True)
             
-        file_extension = ".pdf"
-        file_id = str(uuid.uuid4())
-        filename = f"{file_id}{file_extension}"
-        file_path = os.path.join(static_dir, filename)
-        
+        import base64
         contents = await file.read()
-        with open(file_path, "wb") as f:
-            f.write(contents)
-            
-        file_size_kb = len(contents) // 1024
         
-        # Return the local URL
-        # Note: In production (Vercel), this local path won't persist.
-        # But for this demo/local development, it works great.
+        # Max 5MB limit for Base64 injection to keep Firestore/Vercel happy
+        file_size_kb = len(contents) // 1024
+        if file_size_kb > 5120:
+             raise HTTPException(status_code=400, detail="File too large. Max 5MB allowed.")
+
+        encoded_string = base64.b64encode(contents).decode('utf-8')
+        data_uri = f"data:application/pdf;base64,{encoded_string}"
+        
         return {
-            "url": f"/static/pdfs/{filename}",
+            "url": data_uri,
             "file_size": f"{file_size_kb} KB",
-            "message": "PDF uploaded successfully"
+            "message": "PDF processed successfully"
         }
 
     # Mount static files AFTER routes so they don't override /api
