@@ -683,10 +683,10 @@ if DB_AVAILABLE and schemas is not None:
         import base64
         contents = await file.read()
         
-        # Max 5MB limit for Base64 injection to keep Firestore/Vercel happy
+        # Max 700KB limit for Base64 injection to keep Firestore within 1MB limit
         file_size_kb = len(contents) // 1024
-        if file_size_kb > 5120:
-             raise HTTPException(status_code=400, detail="File too large. Max 5MB allowed.")
+        if file_size_kb > 700:
+             raise HTTPException(status_code=400, detail="File too large. Max 700KB allowed for database storage.")
 
         encoded_string = base64.b64encode(contents).decode('utf-8')
         data_uri = f"data:application/pdf;base64,{encoded_string}"
