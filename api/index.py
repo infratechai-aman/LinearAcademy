@@ -219,12 +219,12 @@ if DB_AVAILABLE and schemas is not None:
         if not student or not student.get("image_url"):
             # Return a default placeholder or 404
             # For now, 404 is fine, frontend handles broken images
-             return Response(status_code=404)
+            return Response(status_code=404)
 
         try:
             image_url = student.get("image_url", "")
             if not image_url:
-                 return Response(status_code=404)
+                return Response(status_code=404)
 
             # 1. Handle Base64 Data URI
             if "base64," in image_url:

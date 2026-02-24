@@ -62,11 +62,12 @@ def create_or_update_site_config(db, config: schemas.SiteConfigCreate):
 
 # --- Student ---
 def get_students(db, skip: int = 0, limit: int = 100):
-    # Optimizing Firestore query: Use order_by and offset/limit for efficiency
-    # Note: offset() in Firestore still bills for skipped documents, 
-    # but it's more efficient than fetching all and slicing in memory.
     docs = firestore_db.collection("students").order_by("id").offset(skip).limit(limit).get()
     return list_to_objs(_docs_to_list(docs))
+
+def get_student(db, student_id: int):
+    doc = firestore_db.collection("students").document(str(student_id)).get()
+    return dict_to_obj(_doc_to_dict(doc))
 
 def create_student(db, student: schemas.StudentCreate):
     student_dict = student.dict()
