@@ -166,7 +166,7 @@ const DemoBookingsManager = () => {
                                 <div className="flex-1">
                                     <div className="flex items-center gap-3 mb-2">
                                         <h4 className="text-lg font-bold text-white">{booking.student_name}</h4>
-                                        <span className={`px - 3 py - 1 rounded - full text - xs font - bold border flex items - center gap - 1 ${getStatusColor(booking.status || 'pending')} `}>
+                                        <span className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-1 ${getStatusColor(booking.status || 'pending')}`}>
                                             {getStatusIcon(booking.status || 'pending')}
                                             {(booking.status || 'pending').toUpperCase()}
                                         </span>
@@ -702,7 +702,7 @@ const TestSeriesManager = () => {
                             <button
                                 key={board}
                                 onClick={() => handleBoardSelect(board)}
-                                className={`flex flex - col items - center justify - center p - 8 bg - gradient - to - br ${boardColors[board]} rounded - xl border border - white / 10 hover: border - luxury - gold transition - colors`}
+                                className={`flex flex-col items-center justify-center p-8 bg-gradient-to-br ${boardColors[board]} rounded-xl border border-white/10 hover:border-luxury-gold transition-colors`}
                             >
                                 <span className="text-4xl mb-4">{boardIcons[board]}</span>
                                 <span className="font-bold">{board}</span>
@@ -1412,13 +1412,13 @@ const MCQTestsManager = () => {
                 <div className="flex bg-white/5 rounded-xl p-1 border border-white/10">
                     <button
                         onClick={() => setActiveView('generator')}
-                        className={`flex items - center gap - 2 px - 6 py - 2.5 rounded - lg font - bold transition - all ${activeView === 'generator' ? 'bg-luxury-gold text-black shadow-lg shadow-luxury-gold/20' : 'text-gray-400 hover:text-white hover:bg-white/5'} `}
+                        className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold transition-all ${activeView === 'generator' ? 'bg-luxury-gold text-black shadow-lg shadow-luxury-gold/20' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
                     >
                         <Sparkles size={18} /> Generator
                     </button>
                     <button
                         onClick={() => setActiveView('tests')}
-                        className={`flex items - center gap - 2 px - 6 py - 2.5 rounded - lg font - bold transition - all ${activeView === 'tests' ? 'bg-luxury-gold text-black shadow-lg shadow-luxury-gold/20' : 'text-gray-400 hover:text-white hover:bg-white/5'} `}
+                        className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold transition-all ${activeView === 'tests' ? 'bg-luxury-gold text-black shadow-lg shadow-luxury-gold/20' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
                     >
                         <ClipboardList size={18} /> All Tests ({existingTests.length})
                     </button>
@@ -1461,7 +1461,7 @@ const MCQTestsManager = () => {
                                         <div
                                             key={board}
                                             onClick={() => setSelectedBoard(board)}
-                                            className={`bg - gradient - to - br ${boardColors[board] || 'from-white/10 to-white/5'} p - 6 rounded - xl border border - white / 10 hover: border - luxury - gold cursor - pointer transition - all group text - center`}
+                                            className={`bg-gradient-to-br ${boardColors[board] || 'from-white/10 to-white/5'} p-6 rounded-xl border border-white/10 hover:border-luxury-gold cursor-pointer transition-all group text-center`}
                                         >
                                             <span className="text-4xl mb-3 block">{boardIcons[board] || '📚'}</span>
                                             <h3 className="font-bold text-white group-hover:text-luxury-gold transition-colors">{board}</h3>
@@ -1626,12 +1626,12 @@ const MCQTestsManager = () => {
                                             {['a', 'b', 'c', 'd'].map((opt) => (
                                                 <div
                                                     key={opt}
-                                                    className={`p - 3 rounded - lg text - sm flex items - center gap - 2 ${q.correct_option === opt ? 'bg-green-500/20 border border-green-500/30 text-green-400' : 'bg-black/30 text-gray-300'} `}
+                                                    className={`p-3 rounded-lg text-sm flex items-center gap-2 ${q.correct_option === opt ? 'bg-green-500/20 border border-green-500/30 text-green-400' : 'bg-black/30 text-gray-300'}`}
                                                 >
-                                                    <span className={`w - 6 h - 6 rounded - full flex items - center justify - center text - xs font - bold flex - shrink - 0 ${q.correct_option === opt ? 'bg-green-500 text-white' : 'bg-white/10 text-gray-400'} `}>
+                                                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${q.correct_option === opt ? 'bg-green-500 text-white' : 'bg-white/10 text-gray-400'}`}>
                                                         {opt.toUpperCase()}
                                                     </span>
-                                                    {q[`option_${opt} `]}
+                                                    {q[`option_${opt}`]}
                                                 </div>
                                             ))}
                                         </div>
