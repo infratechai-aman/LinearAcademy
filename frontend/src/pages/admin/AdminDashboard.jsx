@@ -1130,7 +1130,7 @@ const QuestionBankManager = () => {
                                     <div
                                         key={board}
                                         onClick={() => setSelectedBoard(board)}
-                                        className={`bg - gradient - to - br ${boardColors[board] || 'from-white/10 to-white/5'} p - 6 rounded - xl border border - white / 10 hover: border - luxury - gold cursor - pointer transition - all group text - center`}
+                                        className={`bg-gradient-to-br ${boardColors[board] || 'from-white/10 to-white/5'} p-6 rounded-xl border border-white/10 hover:border-luxury-gold cursor-pointer transition-all group text-center`}
                                     >
                                         <span className="text-4xl mb-3 block">{boardIcons[board] || '📚'}</span>
                                         <h3 className="font-bold text-white group-hover:text-luxury-gold transition-colors">{board}</h3>
