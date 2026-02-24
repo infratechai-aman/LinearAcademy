@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { endpoints } from '../services/api';
+import { endpoints, downloadBase64Pdf } from '../services/api';
 import { FileText, ChevronRight, BookOpen, Download, Loader, Search, Brain, Filter, GraduationCap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -247,15 +247,14 @@ const QuestionBank = () => {
                                                 </div>
                                             </div>
                                         </div>
-                                        <a
-                                            href={pdf.file_url}
-                                            target="_blank"
-                                            rel="noreferrer"
+                                        <button
+                                            type="button"
+                                            onClick={() => downloadBase64Pdf(pdf.file_url, pdf.title)}
                                             className="w-12 h-12 bg-luxury-gold text-black rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg shadow-luxury-gold/20"
                                             title="Download PDF"
                                         >
                                             <Download size={20} />
-                                        </a>
+                                        </button>
                                     </motion.div>
                                 ))}
                             </div>

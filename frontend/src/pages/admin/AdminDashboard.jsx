@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { endpoints } from '../../services/api';
-import { Trash2, Plus, LogOut, Loader, Calendar, CheckCircle, XCircle, Clock, BookOpen, FileText, ClipboardList, PlayCircle, Settings, Users, MessageSquare, Upload, Sparkles, ChevronRight, Brain, RefreshCw, Eye } from 'lucide-react';
+import {
+    Users, Calendar, TestTube, FileText, Settings, BookOpen, Plus,
+    Trash2, Save, Download, Eye, Award, Monitor, Loader, PlayCircle, BarChart, ChevronRight, MessageSquare, Upload, Sparkles, Brain, RefreshCw
+} from 'lucide-react';
+import api, { endpoints, downloadBase64Pdf } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo-v2.png';
 
@@ -37,7 +40,7 @@ const AdminDashboard = () => {
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`w-full text-left py-2.5 px-4 rounded-lg transition-colors flex items-center gap-3 ${activeTab === tab.id ? 'bg-luxury-gold text-black font-bold' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                            className={`w - full text - left py - 2.5 px - 4 rounded - lg transition - colors flex items - center gap - 3 ${activeTab === tab.id ? 'bg-luxury-gold text-black font-bold' : 'text-gray-400 hover:text-white hover:bg-white/5'} `}
                         >
                             <tab.icon size={18} />
                             {tab.name}
@@ -162,7 +165,7 @@ const DemoBookingsManager = () => {
                                 <div className="flex-1">
                                     <div className="flex items-center gap-3 mb-2">
                                         <h4 className="text-lg font-bold text-white">{booking.student_name}</h4>
-                                        <span className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-1 ${getStatusColor(booking.status || 'pending')}`}>
+                                        <span className={`px - 3 py - 1 rounded - full text - xs font - bold border flex items - center gap - 1 ${getStatusColor(booking.status || 'pending')} `}>
                                             {getStatusIcon(booking.status || 'pending')}
                                             {(booking.status || 'pending').toUpperCase()}
                                         </span>
@@ -698,7 +701,7 @@ const TestSeriesManager = () => {
                             <button
                                 key={board}
                                 onClick={() => handleBoardSelect(board)}
-                                className={`flex flex-col items-center justify-center p-8 bg-gradient-to-br ${boardColors[board]} rounded-xl border border-white/10 hover:border-luxury-gold transition-colors`}
+                                className={`flex flex - col items - center justify - center p - 8 bg - gradient - to - br ${boardColors[board]} rounded - xl border border - white / 10 hover: border - luxury - gold transition - colors`}
                             >
                                 <span className="text-4xl mb-4">{boardIcons[board]}</span>
                                 <span className="font-bold">{board}</span>
@@ -771,7 +774,7 @@ const TestSeriesManager = () => {
                                     key={subject.id}
                                     onClick={() => setSelectedSubject(subject)}
                                     className="bg-gradient-to-br from-white/5 to-white/0 p-6 rounded-xl border border-white/10 hover:border-luxury-gold cursor-pointer transition-all"
-                                    style={{ borderColor: `${subject.color}30` }}
+                                    style={{ borderColor: `${subject.color} 30` }}
                                 >
                                     <span className="text-3xl mb-3 block">{subject.icon}</span>
                                     <h3 className="font-bold text-white">{subject.name}</h3>
@@ -859,8 +862,8 @@ const TestSeriesManager = () => {
                                     <h3 className="font-bold text-lg text-white mb-1">{s.title}</h3>
                                     <p className="text-gray-400 text-sm mb-3 line-clamp-2">{s.description}</p>
                                     <div className="flex items-center justify-between">
-                                        <span className={`text-xs font-bold ${s.is_free ? 'text-green-400' : 'text-luxury-gold'}`}>
-                                            {s.is_free ? 'FREE' : `₹${s.price}`}
+                                        <span className={`text - xs font - bold ${s.is_free ? 'text-green-400' : 'text-luxury-gold'} `}>
+                                            {s.is_free ? 'FREE' : `₹${s.price} `}
                                         </span>
                                         <button
                                             onClick={() => setSelectedSeries(s)}
@@ -909,7 +912,7 @@ const TestSeriesManager = () => {
                                 className="w-full bg-black/50 border border-gray-700 rounded p-3 text-white"
                             />
                             <div className="flex items-center gap-4">
-                                <input type="file" accept=".pdf" onChange={handlePdfUpload} className="text-white" />
+                                <input type="file" accept=".pdf" onChange={handlePdfUpload} disabled={uploading} className="text-white disabled:opacity-50" />
                                 {uploading && <Loader className="animate-spin text-luxury-gold" />}
                                 {pdfFormData.file_url && <span className="text-green-400">Uploaded ({pdfFormData.file_size})</span>}
                             </div>
@@ -944,9 +947,9 @@ const TestSeriesManager = () => {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3">
-                                        <a href={pdf.file_url} target="_blank" rel="noopener noreferrer" className="text-luxury-gold hover:underline text-sm">
-                                            View
-                                        </a>
+                                        <button onClick={() => downloadBase64Pdf(pdf.file_url, pdf.title)} className="text-luxury-gold hover:underline text-sm">
+                                            Download
+                                        </button>
                                         <button onClick={() => handleDeletePdf(pdf.id)} className="text-red-400 hover:text-red-300">
                                             <Trash2 size={18} />
                                         </button>
@@ -1126,7 +1129,7 @@ const QuestionBankManager = () => {
                                     <div
                                         key={board}
                                         onClick={() => setSelectedBoard(board)}
-                                        className={`bg-gradient-to-br ${boardColors[board] || 'from-white/10 to-white/5'} p-6 rounded-xl border border-white/10 hover:border-luxury-gold cursor-pointer transition-all group text-center`}
+                                        className={`bg - gradient - to - br ${boardColors[board] || 'from-white/10 to-white/5'} p - 6 rounded - xl border border - white / 10 hover: border - luxury - gold cursor - pointer transition - all group text - center`}
                                     >
                                         <span className="text-4xl mb-3 block">{boardIcons[board] || '📚'}</span>
                                         <h3 className="font-bold text-white group-hover:text-luxury-gold transition-colors">{board}</h3>
@@ -1197,8 +1200,8 @@ const QuestionBankManager = () => {
                                     className="w-full bg-black/50 border border-gray-700 rounded-xl p-3 text-white focus:border-luxury-gold outline-none h-24"
                                 />
                                 <div className="p-4 border-2 border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center gap-3">
-                                    <input type="file" accept=".pdf" onChange={handleFileUpload} className="hidden" id="pdf-upload" />
-                                    <label htmlFor="pdf-upload" className="cursor-pointer bg-white/10 px-4 py-2 rounded-lg hover:bg-white/20 transition-colors flex items-center gap-2">
+                                    <input type="file" accept=".pdf" onChange={handleFileUpload} disabled={uploading} className="hidden" id="pdf-upload" />
+                                    <label htmlFor="pdf-upload" className={`px - 4 py - 2 rounded - lg flex items - center gap - 2 ${uploading ? 'bg-white/5 text-gray-500 cursor-not-allowed' : 'cursor-pointer bg-white/10 hover:bg-white/20 text-white transition-colors'} `}>
                                         <Upload size={18} /> {formData.file_url ? 'Change File' : 'Select PDF'}
                                     </label>
                                     {uploading && <Loader className="animate-spin text-luxury-gold" />}
@@ -1232,7 +1235,7 @@ const QuestionBankManager = () => {
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
-                                            <a href={pdf.file_url} target="_blank" rel="noreferrer" className="p-2 bg-white/5 rounded-lg text-gray-400 hover:text-luxury-gold transition-colors"><Eye size={18} /></a>
+                                            <button onClick={() => downloadBase64Pdf(pdf.file_url, pdf.title)} className="p-2 bg-white/5 rounded-lg text-gray-400 hover:text-luxury-gold transition-colors" title="Download"><Download size={18} /></button>
                                             <button onClick={() => handleDelete(pdf.id)} className="p-2 bg-white/5 rounded-lg text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={18} /></button>
                                         </div>
                                     </div>
@@ -1408,13 +1411,13 @@ const MCQTestsManager = () => {
                 <div className="flex bg-white/5 rounded-xl p-1 border border-white/10">
                     <button
                         onClick={() => setActiveView('generator')}
-                        className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold transition-all ${activeView === 'generator' ? 'bg-luxury-gold text-black shadow-lg shadow-luxury-gold/20' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                        className={`flex items - center gap - 2 px - 6 py - 2.5 rounded - lg font - bold transition - all ${activeView === 'generator' ? 'bg-luxury-gold text-black shadow-lg shadow-luxury-gold/20' : 'text-gray-400 hover:text-white hover:bg-white/5'} `}
                     >
                         <Sparkles size={18} /> Generator
                     </button>
                     <button
                         onClick={() => setActiveView('tests')}
-                        className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold transition-all ${activeView === 'tests' ? 'bg-luxury-gold text-black shadow-lg shadow-luxury-gold/20' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                        className={`flex items - center gap - 2 px - 6 py - 2.5 rounded - lg font - bold transition - all ${activeView === 'tests' ? 'bg-luxury-gold text-black shadow-lg shadow-luxury-gold/20' : 'text-gray-400 hover:text-white hover:bg-white/5'} `}
                     >
                         <ClipboardList size={18} /> All Tests ({existingTests.length})
                     </button>
@@ -1457,7 +1460,7 @@ const MCQTestsManager = () => {
                                         <div
                                             key={board}
                                             onClick={() => setSelectedBoard(board)}
-                                            className={`bg-gradient-to-br ${boardColors[board] || 'from-white/10 to-white/5'} p-6 rounded-xl border border-white/10 hover:border-luxury-gold cursor-pointer transition-all group text-center`}
+                                            className={`bg - gradient - to - br ${boardColors[board] || 'from-white/10 to-white/5'} p - 6 rounded - xl border border - white / 10 hover: border - luxury - gold cursor - pointer transition - all group text - center`}
                                         >
                                             <span className="text-4xl mb-3 block">{boardIcons[board] || '📚'}</span>
                                             <h3 className="font-bold text-white group-hover:text-luxury-gold transition-colors">{board}</h3>
@@ -1505,7 +1508,7 @@ const MCQTestsManager = () => {
                                             key={subject}
                                             onClick={() => setSelectedSubject(subject)}
                                             className="bg-gradient-to-br from-white/5 to-white/0 p-6 rounded-xl border border-white/10 hover:border-luxury-gold cursor-pointer transition-all group"
-                                            style={{ borderColor: `${subjectColors[subject] || '#D4AF37'}30` }}
+                                            style={{ borderColor: `${subjectColors[subject] || '#D4AF37'} 30` }}
                                         >
                                             <span className="text-3xl mb-3 block">{subjectIcons[subject] || '📚'}</span>
                                             <h3 className="font-bold text-white">{subject}</h3>
@@ -1622,12 +1625,12 @@ const MCQTestsManager = () => {
                                             {['a', 'b', 'c', 'd'].map((opt) => (
                                                 <div
                                                     key={opt}
-                                                    className={`p-3 rounded-lg text-sm flex items-center gap-2 ${q.correct_option === opt ? 'bg-green-500/20 border border-green-500/30 text-green-400' : 'bg-black/30 text-gray-300'}`}
+                                                    className={`p - 3 rounded - lg text - sm flex items - center gap - 2 ${q.correct_option === opt ? 'bg-green-500/20 border border-green-500/30 text-green-400' : 'bg-black/30 text-gray-300'} `}
                                                 >
-                                                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${q.correct_option === opt ? 'bg-green-500 text-white' : 'bg-white/10 text-gray-400'}`}>
+                                                    <span className={`w - 6 h - 6 rounded - full flex items - center justify - center text - xs font - bold flex - shrink - 0 ${q.correct_option === opt ? 'bg-green-500 text-white' : 'bg-white/10 text-gray-400'} `}>
                                                         {opt.toUpperCase()}
                                                     </span>
-                                                    {q[`option_${opt}`]}
+                                                    {q[`option_${opt} `]}
                                                 </div>
                                             ))}
                                         </div>
@@ -1790,7 +1793,7 @@ const CoursesManager = () => {
                         <h3 className="font-bold text-lg pr-6">{course.title}</h3>
                         <p className="text-gray-400 text-sm line-clamp-2">{course.description}</p>
                         <div className="flex justify-between items-center mt-3">
-                            <span className={`text-xs ${course.is_free ? 'text-green-400' : 'text-luxury-gold'}`}>{course.is_free ? 'FREE' : `₹${course.price}`}</span>
+                            <span className={`text - xs ${course.is_free ? 'text-green-400' : 'text-luxury-gold'} `}>{course.is_free ? 'FREE' : `₹${course.price} `}</span>
                             {course.instructor_name && <span className="text-gray-500 text-xs">{course.instructor_name}</span>}
                         </div>
                     </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BookOpen, FileText, ClipboardList, ChevronRight, Download, Clock, Award, Users, ArrowLeft } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { endpoints } from '../services/api';
+import { endpoints, downloadBase64Pdf } from '../services/api';
 
 const TestSeries = () => {
     const [selectedBoard, setSelectedBoard] = useState(null);
@@ -397,12 +397,11 @@ const TestSeries = () => {
                                     ) : (
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {Array.isArray(pdfs) && pdfs.map((pdf) => (
-                                                <a
+                                                <button
                                                     key={pdf.id}
-                                                    href={pdf.file_url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/10 hover:border-luxury-gold transition-colors group"
+                                                    type="button"
+                                                    onClick={() => downloadBase64Pdf(pdf.file_url, pdf.title)}
+                                                    className="flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/10 hover:border-luxury-gold transition-colors group text-left w-full"
                                                 >
                                                     <div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center">
                                                         <FileText className="w-6 h-6 text-red-400" />
@@ -415,7 +414,7 @@ const TestSeries = () => {
                                                         <span className="text-gray-500 text-xs">{pdf.file_size}</span>
                                                     </div>
                                                     <Download className="w-5 h-5 text-gray-400 group-hover:text-luxury-gold" />
-                                                </a>
+                                                </button>
                                             ))}
                                         </div>
                                     )}
