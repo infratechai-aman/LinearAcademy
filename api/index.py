@@ -184,30 +184,51 @@ if DB_AVAILABLE and schemas is not None:
     # ================== STUDENTS ==================
     @app.get("/api/students")
     def read_students(skip: int = 0, limit: int = 100, db = Depends(get_db)):
-        cache_key = f"students_{skip}_{limit}"
+        cache_key = f"students_{skip}_{limit}_sorted"
         cached = get_cached_data(cache_key)
         if cached:
             return cached
 
-        students = crud.get_students(db, skip=skip, limit=limit)
-        # Transform to lightweight response (replace Base64 with URL)
+        students = crud.get_students(db, skip=0, limit=1000) # Fetch all for proper sorting
+        
+        # Transform and parse grade
+        import re
         results = []
         for s in students:
-            # construct a dict to avoid modifying the DB object
+            # Try to extract a numeric grade for sorting
+            grade_val = 0.0
+            if s.rank:
+                match = re.search(r"(\d+\.?\d*)", s.rank)
+                if match:
+                    try:
+                        grade_val = float(match.group(1))
+                    except:
+                        pass
+            
             s_dict = {
                 "id": s.id,
                 "name": s.name,
                 "rank": s.rank,
                 "description": s.description,
                 "is_active": s.is_active,
-                # If it has an image, point to the serving endpoint
-                # If no image, keep it None or empty
-                "image_url": f"/api/students/{s.id}/image" if s.image_url else None
+                "image_url": f"/api/students/{s.id}/image" if s.image_url else None,
+                "_grade": grade_val # Hidden field for sorting
             }
             results.append(s_dict)
         
-        set_cached_data(cache_key, results)
-        return results
+        # Sort by grade (descending)
+        results.sort(key=lambda x: x["_grade"], reverse=True)
+        
+        # Remove hidden field and apply pagination
+        final_results = []
+        for r in results:
+            del r["_grade"]
+            final_results.append(r)
+            
+        paginated_results = final_results[skip : skip + limit]
+        
+        set_cached_data(cache_key, paginated_results)
+        return paginated_results
 
     @app.get("/api/students/{student_id}/image")
     def serve_student_image(student_id: int, db = Depends(get_db)):
