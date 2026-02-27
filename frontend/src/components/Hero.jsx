@@ -33,8 +33,8 @@ const Hero = () => {
             <span className="text-xs font-bold tracking-widest uppercase">The Future of Coaching</span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif text-white mb-6 leading-tight tracking-tight">
-            Linear <span className="text-transparent bg-clip-text bg-gradient-to-r from-luxury-gold via-[#fff5d6] to-luxury-gold animate-gradient">Academy</span>
+          <h1 className="text-5xl lg:text-7xl font-serif text-white mb-6 leading-tight tracking-tight">
+            Linear <span className="text-transparent bg-clip-text bg-gradient-to-r from-luxury-gold via-[#fff5d6] to-luxury-gold animate-gradient">Academy</span> – JEE &amp; NEET Coaching
           </h1>
 
           <p className="text-gray-300 text-lg md:text-xl max-w-2xl mx-auto mb-10 font-light leading-relaxed">
@@ -59,10 +59,10 @@ const Hero = () => {
             </Link>
           </div>
         </motion.div>
-      </div>
+      </div >
 
       {/* Scroll Indicator */}
-      <motion.div
+      < motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5, duration: 1 }}
@@ -70,8 +70,8 @@ const Hero = () => {
       >
         <span className="text-[10px] tracking-[0.3em] uppercase">Scroll to Explore</span>
         <div className="w-[1px] h-16 bg-gradient-to-b from-luxury-gold to-transparent" />
-      </motion.div>
-    </section>
+      </motion.div >
+    </section >
   );
 };
 
