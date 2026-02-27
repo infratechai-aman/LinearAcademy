@@ -34,7 +34,7 @@ const Hero = () => {
           </div>
 
           <h1 className="text-5xl lg:text-7xl font-serif text-white mb-6 leading-tight tracking-tight">
-            Linear <span className="text-transparent bg-clip-text bg-gradient-to-r from-luxury-gold via-[#fff5d6] to-luxury-gold animate-gradient">Academy</span> – JEE &amp; NEET Coaching
+            Linear <span className="text-transparent bg-clip-text bg-gradient-to-r from-luxury-gold via-[#fff5d6] to-luxury-gold animate-gradient">Academy</span>
           </h1>
 
           <p className="text-gray-300 text-lg md:text-xl max-w-2xl mx-auto mb-10 font-light leading-relaxed">
