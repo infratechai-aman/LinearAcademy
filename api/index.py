@@ -115,6 +115,9 @@ def login(request: LoginRequest, db = Depends(get_db)):
             raise HTTPException(status_code=400, detail="Incorrect username or password")
         
         return {"access_token": "user-token", "token_type": "bearer", "user": {"username": user.email, "role": "user"}}
+    except HTTPException:
+        # Re-raise the HTTP Exception directly so we get the 400 status
+        raise
     except Exception as e:
         print(f"Login error: {e}")
         # If expected DB error, re-raise 500
